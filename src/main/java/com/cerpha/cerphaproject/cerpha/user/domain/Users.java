@@ -1,6 +1,6 @@
 package com.cerpha.cerphaproject.cerpha.user.domain;
 
-import com.cerpha.cerphaproject.BaseTimeEntity;
+import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseTimeEntity {
+public class Users extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,7 @@ public class User extends BaseTimeEntity {
     private UserRole role;
 
     @Builder
-    public User(String email, String password, String name, String nickname, String phone, String address, UserRole role) {
+    public Users(String email, String password, String name, String nickname, String phone, String address, UserRole role) {
         this.email = email;
         this.password = password;
         this.name = name;

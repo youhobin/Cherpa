@@ -1,4 +1,4 @@
-package com.cerpha.cerphaproject;
+package com.cerpha.cerphaproject.cerpha;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
