@@ -9,7 +9,7 @@ public class CerphaProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(CerphaProjectApplication.class, args);
         // 깃 확인
-        // test 2
+        // git local test
     }
 
 }
