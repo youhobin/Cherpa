@@ -14,13 +14,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity businessExceptionHandler(BusinessException e) {
-        log.error("BusinessExceptionHandler = {}", e);
+        log.error("BusinessExceptionHandler", e);
 
         return ResponseEntity.status(BAD_REQUEST).body(new ExceptionResponse(e.getExceptionCode()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> exceptionHandler(Exception e) {
+        log.error("ERROR", e);
         return ResponseEntity.status(400)
                 .body(e);
     }
