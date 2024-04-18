@@ -46,6 +46,7 @@ public class WebSecurity {
                 //여기부터는 지우기 ?
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "PUT")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager)

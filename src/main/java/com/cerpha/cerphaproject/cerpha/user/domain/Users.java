@@ -2,6 +2,8 @@ package com.cerpha.cerphaproject.cerpha.user.domain;
 
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
+import com.cerpha.cerphaproject.common.converter.EncryptionConverter;
+import com.cerpha.cerphaproject.common.encryption.AESEncryption;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,12 +20,21 @@ public class Users extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Convert(converter = EncryptionConverter.class)
     private String email;
+
     private String password;
+
+    @Convert(converter = EncryptionConverter.class)
     private String name;
-    private String nickname;
+
+    @Convert(converter = EncryptionConverter.class)
     private String phone;
+
+    @Convert(converter = EncryptionConverter.class)
     private String address;
+
+    private String nickname;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -37,6 +48,13 @@ public class Users extends BaseTimeEntity {
         this.phone = phone;
         this.address = address;
         this.role = role;
+    }
+
+    public void encryptPrivacy(AESEncryption aesEncryption) throws Exception {
+        this.email = aesEncryption.encrypt(email);
+        this.name = aesEncryption.encrypt(name);
+        this.phone = aesEncryption.encrypt(phone);
+        this.address = aesEncryption.encrypt(address);
     }
 
     public void updateProfile(UpdateProfileRequest request) {

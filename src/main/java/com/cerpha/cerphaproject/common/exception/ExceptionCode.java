@@ -4,7 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum ExceptionCode {
-    NOT_FOUND_USER(404, "U001", "사용자를 찾을 수 없습니다.");
+
+    //common
+    AES_ENCRYPTION_ERROR(500, "C001", "Encryption 오류"),
+
+    // user
+    NOT_FOUND_USER(404, "U001", "사용자를 찾을 수 없습니다."),
+    DUPLICATED_EMAIL(400,"U002","중복된 이메일 입니다.");
 
     private final int status;
     private final String code;

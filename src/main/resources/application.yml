@@ -39,6 +39,8 @@ env:
       {number}
       
       감사합니다.
+  encryption:
+    key: "sherpaprojectforclimbingshopping"
 
 logging:
   level:

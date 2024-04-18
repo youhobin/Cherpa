@@ -4,6 +4,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
+import com.cerpha.cerphaproject.common.encryption.AESEncryption;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
