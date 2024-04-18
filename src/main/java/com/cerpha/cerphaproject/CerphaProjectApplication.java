@@ -8,6 +8,7 @@ public class CerphaProjectApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(CerphaProjectApplication.class, args);
+        // 깃 확인
     }
 
 }
