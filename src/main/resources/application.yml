@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: cerpha
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:13306/shop
+    username: hobin
+    password: zaq12wsx
