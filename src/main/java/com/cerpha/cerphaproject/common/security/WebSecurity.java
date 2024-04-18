@@ -28,6 +28,8 @@ public class WebSecurity {
 
         http.authorizeHttpRequests((authz) -> authz
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/signup", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/auth/users/email", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/auth/users/email/verify", "POST")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager)

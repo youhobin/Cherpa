@@ -14,7 +14,31 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: q77642260@gmail.com
+    password: abqacnnbukvivoxz
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
 
+env:
+  mail:
+    mailer: "q77642260@gmail.com"
+    subject: "Cerpha 이메일 인증입니다."
+    emailTemplate: |
+      회원 가입을 위한 인증 번호입니다.
+      아래 번호를 이메일 인증 번호에 적어주세요.
+      
+      {number}
+      
+      감사합니다.
 
 logging:
   level:
