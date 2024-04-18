@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.cerpha.user.domain;
 
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
+import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.common.converter.EncryptionConverter;
 import com.cerpha.cerphaproject.common.encryption.AESEncryption;
@@ -62,4 +63,7 @@ public class Users extends BaseTimeEntity {
         this.phone = request.getPhone();
     }
 
+    public void changePassword(UpdatePasswordRequest request) {
+        this.password = request.getNewPassword();
+    }
 }

@@ -1,5 +1,6 @@
 package com.cerpha.cerphaproject.cerpha.user.controller;
 
+import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
@@ -32,4 +33,12 @@ public class UserController {
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
+
+    @PutMapping("/users/{userId}/password")
+    public ResponseEntity<ResultDto> updateUserPassword(@PathVariable("userId") Long userId,
+                                                        @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        userService.updatePassword(userId, updatePasswordRequest);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
+    }
+
 }
