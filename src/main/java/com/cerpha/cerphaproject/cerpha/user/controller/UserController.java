@@ -1,14 +1,12 @@
 package com.cerpha.cerphaproject.cerpha.user.controller;
 
+import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.cerpha.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -25,5 +23,13 @@ public class UserController {
         UserResponse userResponse = userService.getUserProfile(userId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userResponse));
+    }
+
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<ResultDto> updateUserProfile(@PathVariable("userId") Long userId,
+                                                       @RequestBody UpdateProfileRequest updateProfileRequest) {
+        userService.updateUserProfile(userId, updateProfileRequest);
+
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 }

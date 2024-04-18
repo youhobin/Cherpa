@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/users/email/verify")
-    public ResponseEntity<ResultDto<Boolean>> verifyEmail(@RequestBody EmailRequest emailRequest, HttpSession session) {
+    public ResponseEntity<ResultDto> verifyEmail(@RequestBody EmailRequest emailRequest, HttpSession session) {
         boolean isVerified = authService.verifyEmail(emailRequest, session);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, isVerified));

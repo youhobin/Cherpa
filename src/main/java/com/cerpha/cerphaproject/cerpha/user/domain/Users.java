@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.cerpha.user.domain;
 
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
+import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,4 +38,10 @@ public class Users extends BaseTimeEntity {
         this.address = address;
         this.role = role;
     }
+
+    public void updateProfile(UpdateProfileRequest request) {
+        this.address = request.getAddress();
+        this.phone = request.getPhone();
+    }
+
 }
