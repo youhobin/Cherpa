@@ -5,6 +5,7 @@ import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/users/email/verify")
-    public ResponseEntity<ResultDto> verifyEmail(@RequestBody EmailRequest emailRequest, HttpSession session) {
+    public ResponseEntity<ResultDto> verifyEmail(@Valid @RequestBody EmailRequest emailRequest, HttpSession session) {
         boolean isVerified = authService.verifyEmail(emailRequest, session);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, isVerified));

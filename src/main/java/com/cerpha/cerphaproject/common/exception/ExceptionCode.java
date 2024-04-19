@@ -7,6 +7,7 @@ public enum ExceptionCode {
 
     //common
     AES_ENCRYPTION_ERROR(500, "C001", "Encryption 오류"),
+    INVALID_REQUEST(400, "C002", "유효하지 않은 입력 값입니다."),
 
     // user
     NOT_FOUND_USER(404, "U001", "사용자를 찾을 수 없습니다."),
