@@ -112,6 +112,11 @@ public class AuthService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
+    public Users getUserById(Long id) {
+        return authRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER.getMessage()));
+    }
+
     private int createAuthNumber() {
         return new Random().nextInt((999999 - 100000) + 1) + 100000;
     }
