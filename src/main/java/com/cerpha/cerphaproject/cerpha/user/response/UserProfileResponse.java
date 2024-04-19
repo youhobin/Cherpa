@@ -4,7 +4,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import lombok.Getter;
 
 @Getter
-public class UserResponse {
+public class UserProfileResponse {
 
     private Long id;
     private String name;
@@ -13,7 +13,7 @@ public class UserResponse {
     private String phone;
     private String address;
 
-    public UserResponse(Users user) {
+    public UserProfileResponse(Users user) {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getEmail();

@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.cerpha.wishlist.controller;
 
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.cerphaproject.cerpha.wishlist.service.WishlistService;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import org.springframework.http.HttpStatus;
@@ -19,8 +20,15 @@ public class WishlistController {
 
     @PostMapping("/{userId}")
     public ResponseEntity<ResultDto> addWishlist(@PathVariable("userId") Long userId,
-                                      @RequestBody AddWishlistRequest addWishlistRequest) {
+                                                 @RequestBody AddWishlistRequest addWishlistRequest) {
         wishlistService.addWishlist(userId, addWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ResultDto<AllWishlistResponse>> getWishlists(@PathVariable("userId") Long userId) {
+        AllWishlistResponse wishlist = wishlistService.getWishlists(userId);
+
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, wishlist));
     }
 }
