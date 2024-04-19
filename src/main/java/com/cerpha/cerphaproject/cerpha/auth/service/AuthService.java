@@ -41,15 +41,13 @@ public class AuthService implements UserDetailsService {
     private final AuthRepository authRepository;
     private final JavaMailSender mailSender;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final AESEncryption aesEncryption;
 
     public AuthService(AuthRepository authRepository,
                        JavaMailSender mailSender,
-                       BCryptPasswordEncoder passwordEncoder, AESEncryption aesEncryption) {
+                       BCryptPasswordEncoder passwordEncoder) {
         this.authRepository = authRepository;
         this.mailSender = mailSender;
         this.passwordEncoder = passwordEncoder;
-        this.aesEncryption = aesEncryption;
     }
 
     @Transactional
