@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.cerpha.wishlist.controller;
 
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.request.DeleteWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.request.UpdateWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.cerphaproject.cerpha.wishlist.service.WishlistService;
@@ -36,8 +37,16 @@ public class WishlistController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<ResultDto> updateWishlistUnitCount(@PathVariable("userId") Long userId,
-                                                  @RequestBody UpdateWishlistRequest updateWishlistRequest) {
+                                                             @Valid @RequestBody UpdateWishlistRequest updateWishlistRequest) {
         wishlistService.updateWishlist(userId, updateWishlistRequest);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ResultDto> deleteWishlist(@PathVariable("userId") Long userId,
+                                                    @Valid @RequestBody DeleteWishlistRequest deleteWishlistRequest) {
+        wishlistService.deleteWishlist(userId, deleteWishlistRequest);
+
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 }
