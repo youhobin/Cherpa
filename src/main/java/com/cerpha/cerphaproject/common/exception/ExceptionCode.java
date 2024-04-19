@@ -16,7 +16,10 @@ public enum ExceptionCode {
     NOT_EQUAL_PREV_PASSWORD(400, "U004", "기존 비밀번호와 일치하지 않습니다."),
 
     // product
-    NOT_FOUND_PRODUCT(404, "P001", "상품을 찾을 수 없습니다.");
+    NOT_FOUND_PRODUCT(404, "P001", "상품을 찾을 수 없습니다."),
+
+    // wishlist
+    DUPLICATED_WISHLIST_PRODUCT(400, "W001", "이미 WishList에 등록된 상품입니다.");
 
     private final int status;
     private final String code;

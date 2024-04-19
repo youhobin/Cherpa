@@ -5,6 +5,7 @@ import com.cerpha.cerphaproject.cerpha.product.domain.Product;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,10 @@ public class Wishlist extends BaseTimeEntity {
 
     private Long unitCount;
 
+    @Builder
+    public Wishlist(Users user, Product product, Long unitCount) {
+        this.user = user;
+        this.product = product;
+        this.unitCount = unitCount;
+    }
 }
