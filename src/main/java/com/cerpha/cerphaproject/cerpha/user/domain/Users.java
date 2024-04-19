@@ -22,22 +22,29 @@ public class Users extends BaseTimeEntity {
     private Long id;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_email")
     private String email;
 
+    @Column(name = "user_password")
     private String password;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_name")
     private String name;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_phone")
     private String phone;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_address")
     private String address;
 
+    @Column(name = "user_nickname")
     private String nickname;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "user_role")
     private UserRole role;
 
     @Builder

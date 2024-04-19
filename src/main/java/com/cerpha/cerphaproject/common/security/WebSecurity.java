@@ -49,6 +49,7 @@ public class WebSecurity {
 //                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "PUT")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/products/**", "GET")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager)
