@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.common.security;
 
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
+import com.cerpha.cerphaproject.common.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -44,7 +46,7 @@ public class WebSecurity {
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/email/verify", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/login", "POST")).permitAll()
                 //여기부터는 지우기 ?
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/users/**", "PUT")).permitAll()
                         .anyRequest().authenticated()
@@ -54,6 +56,7 @@ public class WebSecurity {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilter(getAuthenticationFilter(authenticationManager));
+        http.addFilterBefore(new JwtAuthenticationFilter(env, authService), UsernamePasswordAuthenticationFilter.class);
         http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()));
 
         return http.build();
