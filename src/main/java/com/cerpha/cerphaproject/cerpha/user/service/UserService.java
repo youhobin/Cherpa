@@ -4,7 +4,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
-import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
+import com.cerpha.cerphaproject.cerpha.user.response.UserProfileResponse;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +28,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getUserProfile(Long userId) {
+    public UserProfileResponse getUserProfile(Long userId) {
         Users user = getUserById(userId);
 
-        return new UserResponse(user);
+        return new UserProfileResponse(user);
     }
 
     @Transactional

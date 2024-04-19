@@ -2,7 +2,7 @@ package com.cerpha.cerphaproject.cerpha.user.controller;
 
 import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
-import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
+import com.cerpha.cerphaproject.cerpha.user.response.UserProfileResponse;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.cerpha.user.service.UserService;
 import jakarta.validation.Valid;
@@ -21,10 +21,10 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ResultDto<UserResponse>> getUserProfile(@PathVariable("userId") Long userId) {
-        UserResponse userResponse = userService.getUserProfile(userId);
+    public ResponseEntity<ResultDto<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
+        UserProfileResponse userProfileResponse = userService.getUserProfile(userId);
 
-        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userResponse));
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userProfileResponse));
     }
 
     @PutMapping("/users/{userId}")
