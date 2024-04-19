@@ -7,11 +7,15 @@ import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.domain.Wishlist;
 import com.cerpha.cerphaproject.cerpha.wishlist.repository.WishlistRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
+import com.cerpha.cerphaproject.cerpha.wishlist.response.WishlistResponse;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import com.cerpha.cerphaproject.common.exception.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.cerpha.cerphaproject.common.exception.ExceptionCode.*;
 
@@ -47,5 +51,33 @@ public class WishlistService {
                 .build();
 
         wishlistRepository.save(wishlist);
+    }
+
+    @Transactional(readOnly = true)
+    public AllWishlistResponse getWishlists(Long userId) {
+        List<Wishlist> wishlists = wishlistRepository.findByUserIdWithProduct(userId);
+
+        List<WishlistResponse> wishlistResponses = wishlists.stream()
+                .map(w -> WishlistResponse.builder()
+                        .productId(w.getProduct().getId())
+                        .unitCount(w.getUnitCount())
+                        .productName(w.getProduct().getName())
+                        .productPrice(w.getProduct().getPrice())
+                        .build())
+                .toList();
+
+        long totalPrice = getTotalPrice(wishlists);
+
+        return AllWishlistResponse.builder()
+                .userId(userId)
+                .totalPrice(totalPrice)
+                .wishlist(wishlistResponses)
+                .build();
+    }
+
+    private long getTotalPrice(List<Wishlist> wishlists) {
+        return wishlists.stream()
+                .mapToLong(w -> w.getUnitCount() * w.getProduct().getPrice())
+                .sum();
     }
 }
