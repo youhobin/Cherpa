@@ -1,4 +1,4 @@
-package com.cerpha.cerphaproject.cerpha.product;
+package com.cerpha.cerphaproject.cerpha.product.domain;
 
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
 import jakarta.persistence.*;
