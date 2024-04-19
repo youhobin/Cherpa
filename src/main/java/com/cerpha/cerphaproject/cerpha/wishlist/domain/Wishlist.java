@@ -37,4 +37,8 @@ public class Wishlist extends BaseTimeEntity {
         this.product = product;
         this.unitCount = unitCount;
     }
+
+    public void changeProductUnitCount(Long changedUnitCount) {
+        this.unitCount = changedUnitCount;
+    }
 }

@@ -1,9 +1,11 @@
 package com.cerpha.cerphaproject.cerpha.wishlist.controller;
 
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.request.UpdateWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.cerphaproject.cerpha.wishlist.service.WishlistService;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,7 @@ public class WishlistController {
 
     @PostMapping("/{userId}")
     public ResponseEntity<ResultDto> addWishlist(@PathVariable("userId") Long userId,
-                                                 @RequestBody AddWishlistRequest addWishlistRequest) {
+                                                 @Valid @RequestBody AddWishlistRequest addWishlistRequest) {
         wishlistService.addWishlist(userId, addWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
@@ -30,5 +32,12 @@ public class WishlistController {
         AllWishlistResponse wishlist = wishlistService.getWishlists(userId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, wishlist));
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<ResultDto> updateWishlistUnitCount(@PathVariable("userId") Long userId,
+                                                  @RequestBody UpdateWishlistRequest updateWishlistRequest) {
+        wishlistService.updateWishlist(userId, updateWishlistRequest);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 }
