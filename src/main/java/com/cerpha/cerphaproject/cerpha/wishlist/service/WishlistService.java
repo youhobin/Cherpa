@@ -7,6 +7,7 @@ import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.domain.Wishlist;
 import com.cerpha.cerphaproject.cerpha.wishlist.repository.WishlistRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.request.DeleteWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.request.UpdateWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.WishlistResponse;
@@ -82,6 +83,15 @@ public class WishlistService {
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_WISHLIST));
 
         wishlist.changeProductUnitCount(request.getUnitCount());
+    }
+
+    @Transactional
+    public void deleteWishlist(Long userId, DeleteWishlistRequest request) {
+        if (wishlistRepository.findByUserIdAndProductId(userId, request.getProductId()).isEmpty()) {
+            throw new BusinessException(NOT_FOUND_WISHLIST);
+        }
+
+        wishlistRepository.deleteByUserIdAndProductId(userId, request.getProductId());
     }
 
     private long getTotalPrice(List<Wishlist> wishlists) {
