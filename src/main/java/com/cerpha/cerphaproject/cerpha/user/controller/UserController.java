@@ -5,6 +5,7 @@ import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.cerpha.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class UserController {
 
     @PutMapping("/users/{userId}")
     public ResponseEntity<ResultDto> updateUserProfile(@PathVariable("userId") Long userId,
-                                                       @RequestBody UpdateProfileRequest updateProfileRequest) {
+                                                       @Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
         userService.updateUserProfile(userId, updateProfileRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
@@ -36,7 +37,7 @@ public class UserController {
 
     @PutMapping("/users/{userId}/password")
     public ResponseEntity<ResultDto> updateUserPassword(@PathVariable("userId") Long userId,
-                                                        @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+                                                        @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         userService.updatePassword(userId, updatePasswordRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
