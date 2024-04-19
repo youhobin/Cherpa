@@ -19,7 +19,8 @@ public enum ExceptionCode {
     NOT_FOUND_PRODUCT(404, "P001", "상품을 찾을 수 없습니다."),
 
     // wishlist
-    DUPLICATED_WISHLIST_PRODUCT(400, "W001", "이미 WishList에 등록된 상품입니다.");
+    DUPLICATED_WISHLIST_PRODUCT(400, "W001", "이미 WishList에 등록된 상품입니다."),
+    NOT_FOUND_WISHLIST(404, "W002", "WishList에서 해당 상품을 찾을 수 없습니다.");
 
     private final int status;
     private final String code;

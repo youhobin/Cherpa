@@ -7,6 +7,7 @@ import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.domain.Wishlist;
 import com.cerpha.cerphaproject.cerpha.wishlist.repository.WishlistRepository;
 import com.cerpha.cerphaproject.cerpha.wishlist.request.AddWishlistRequest;
+import com.cerpha.cerphaproject.cerpha.wishlist.request.UpdateWishlistRequest;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.cerphaproject.cerpha.wishlist.response.WishlistResponse;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
@@ -73,6 +74,14 @@ public class WishlistService {
                 .totalPrice(totalPrice)
                 .wishlist(wishlistResponses)
                 .build();
+    }
+
+    @Transactional
+    public void updateWishlist(Long userId, UpdateWishlistRequest request) {
+        Wishlist wishlist = wishlistRepository.findByUserIdAndProductId(userId, request.getProductId())
+                .orElseThrow(() -> new BusinessException(NOT_FOUND_WISHLIST));
+
+        wishlist.changeProductUnitCount(request.getUnitCount());
     }
 
     private long getTotalPrice(List<Wishlist> wishlists) {
