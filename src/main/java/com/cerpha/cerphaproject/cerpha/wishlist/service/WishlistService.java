@@ -36,12 +36,12 @@ public class WishlistService {
     }
 
     @Transactional
-    public void addWishlist(Long userId, AddWishlistRequest request) {
-        if (wishlistRepository.findByUserIdAndProductId(userId, request.getProductId()).isPresent()) {
+    public void addWishlist(AddWishlistRequest request) {
+        if (wishlistRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId()).isPresent()) {
             throw new BusinessException(DUPLICATED_WISHLIST_PRODUCT);
         }
 
-        Users user = userRepository.findById(userId)
+        Users user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
@@ -78,20 +78,20 @@ public class WishlistService {
     }
 
     @Transactional
-    public void updateWishlist(Long userId, UpdateWishlistRequest request) {
-        Wishlist wishlist = wishlistRepository.findByUserIdAndProductId(userId, request.getProductId())
+    public void updateWishlist(UpdateWishlistRequest request) {
+        Wishlist wishlist = wishlistRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId())
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_WISHLIST));
 
         wishlist.changeProductUnitCount(request.getUnitCount());
     }
 
     @Transactional
-    public void deleteWishlist(Long userId, DeleteWishlistRequest request) {
-        if (wishlistRepository.findByUserIdAndProductId(userId, request.getProductId()).isEmpty()) {
+    public void deleteWishlist(DeleteWishlistRequest request) {
+        if (wishlistRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId()).isEmpty()) {
             throw new BusinessException(NOT_FOUND_WISHLIST);
         }
 
-        wishlistRepository.deleteByUserIdAndProductId(userId, request.getProductId());
+        wishlistRepository.deleteByUserIdAndProductId(request.getUserId(), request.getProductId());
     }
 
     private long getTotalPrice(List<Wishlist> wishlists) {
