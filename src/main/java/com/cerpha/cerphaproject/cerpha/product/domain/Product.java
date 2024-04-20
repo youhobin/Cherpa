@@ -30,4 +30,8 @@ public class Product extends BaseTimeEntity {
         // todo 재고가 0보다 작게되면 exception 발생
         this.stock = remainingStock;
     }
+
+    public void restoreStock(Long unitCount) {
+        this.stock += unitCount;
+    }
 }

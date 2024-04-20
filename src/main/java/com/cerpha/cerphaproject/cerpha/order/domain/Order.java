@@ -3,6 +3,8 @@ package com.cerpha.cerphaproject.cerpha.order.domain;
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.common.converter.EncryptionConverter;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -73,4 +75,11 @@ public class Order extends BaseTimeEntity {
         this.status = PAYMENT;
     }
 
+    public void cancel() {
+        if (!this.status.equals(PAYMENT)) {
+            throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
+        }
+
+        this.status = CANCEL;
+    }
 }

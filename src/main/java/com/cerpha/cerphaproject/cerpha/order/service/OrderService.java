@@ -61,7 +61,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderListResponse getOrderList(OrderListRequest request) {
         List<OrderProduct> orderProducts =
-                orderProductRepository.findOrderProductWithOrderAndProductByUserId(request.getUserId());
+                orderProductRepository.findOrderProductsByUserId(request.getUserId());
 
         List<OrderResponse> orderResponses = orderProducts.stream()
                 .collect(groupingBy(OrderProduct::getOrder))
@@ -95,6 +95,18 @@ public class OrderService {
 
         return new OrderListResponse(sortedResponses);
 
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+
+        orderProducts
+                .forEach(orderProduct -> orderProduct.getProduct().restoreStock(orderProduct.getUnitCount()));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
+        order.cancel();
     }
 
     private List<OrderResponse> sortOrderResponse(List<OrderResponse> orderResponses) {
