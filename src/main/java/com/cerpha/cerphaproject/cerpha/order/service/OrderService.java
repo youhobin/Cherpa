@@ -91,11 +91,15 @@ public class OrderService {
                 })
                 .toList();
 
-        List<OrderResponse> sortedResponses = orderResponses.stream()
-                .sorted(Comparator.comparing(OrderResponse::getUpdatedAt).reversed())
-                .toList();
+        List<OrderResponse> sortedResponses = sortOrderResponse(orderResponses);
 
         return new OrderListResponse(sortedResponses);
 
+    }
+
+    private List<OrderResponse> sortOrderResponse(List<OrderResponse> orderResponses) {
+        return orderResponses.stream()
+                .sorted(Comparator.comparing(OrderResponse::getUpdatedAt).reversed())
+                .toList();
     }
 }
