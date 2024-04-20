@@ -72,4 +72,8 @@ public class Order extends BaseTimeEntity {
 
         return false;
     }
+
+    public void requestRefund() {
+        this.status = REFUNDING;
+    }
 }

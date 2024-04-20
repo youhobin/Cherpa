@@ -4,6 +4,7 @@ import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
 import com.cerpha.cerphaproject.cerpha.order.domain.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,4 +24,9 @@ public class Refund extends BaseTimeEntity {
 
     private String reason;
 
+    @Builder
+    public Refund(Order order, String reason) {
+        this.order = order;
+        this.reason = reason;
+    }
 }
