@@ -21,10 +21,9 @@ public class WishlistController {
         this.wishlistService = wishlistService;
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<ResultDto> addWishlist(@PathVariable("userId") Long userId,
-                                                 @Valid @RequestBody AddWishlistRequest addWishlistRequest) {
-        wishlistService.addWishlist(userId, addWishlistRequest);
+    @PostMapping
+    public ResponseEntity<ResultDto> addWishlist(@Valid @RequestBody AddWishlistRequest addWishlistRequest) {
+        wishlistService.addWishlist(addWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
@@ -35,17 +34,15 @@ public class WishlistController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, wishlist));
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<ResultDto> updateWishlistUnitCount(@PathVariable("userId") Long userId,
-                                                             @Valid @RequestBody UpdateWishlistRequest updateWishlistRequest) {
-        wishlistService.updateWishlist(userId, updateWishlistRequest);
+    @PutMapping
+    public ResponseEntity<ResultDto> updateWishlistUnitCount(@Valid @RequestBody UpdateWishlistRequest updateWishlistRequest) {
+        wishlistService.updateWishlist(updateWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<ResultDto> deleteWishlist(@PathVariable("userId") Long userId,
-                                                    @Valid @RequestBody DeleteWishlistRequest deleteWishlistRequest) {
-        wishlistService.deleteWishlist(userId, deleteWishlistRequest);
+    @DeleteMapping
+    public ResponseEntity<ResultDto> deleteWishlist(@Valid @RequestBody DeleteWishlistRequest deleteWishlistRequest) {
+        wishlistService.deleteWishlist(deleteWishlistRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
