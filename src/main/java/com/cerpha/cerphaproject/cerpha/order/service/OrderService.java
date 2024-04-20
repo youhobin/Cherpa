@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.cerpha.cerphaproject.cerpha.order.domain.OrderStatus.PAYMENT;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -49,7 +50,13 @@ public class OrderService {
                         .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT)), p.getUnitCount()))
                 .toList();
 
-        Order order = Order.addOrder(request.getDeliveryAddress(), request.getDeliveryPhone(), user, orderProducts);
+        Order order = Order.builder()
+                .deliveryAddress(request.getDeliveryAddress())
+                .deliveryPhone(request.getDeliveryPhone())
+                .status(PAYMENT)
+                .user(user)
+                .totalPrice(getTotalOrderPrice(orderProducts))
+                .build();
 
         orderRepository.save(order);
 
@@ -113,5 +120,11 @@ public class OrderService {
         return orderResponses.stream()
                 .sorted(Comparator.comparing(OrderResponse::getUpdatedAt).reversed())
                 .toList();
+    }
+
+    private static long getTotalOrderPrice(List<OrderProduct> orderProducts) {
+        return orderProducts.stream()
+                .mapToLong(p -> p.getUnitPrice() * p.getUnitCount())
+                .sum();
     }
 }
