@@ -25,4 +25,9 @@ public class Product extends BaseTimeEntity {
     private Long stock;
     private String producer;
 
+    public void decreaseStock(Long unitCount) {
+        long remainingStock = this.stock - unitCount;
+        // todo 재고가 0보다 작게되면 exception 발생
+        this.stock = remainingStock;
+    }
 }
