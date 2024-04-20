@@ -40,24 +40,19 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderProduct> orderProducts;
-
     @Builder
-    public Order(String deliveryAddress, String deliveryPhone, Long totalPrice, OrderStatus status, Users user, List<OrderProduct> orderProducts) {
+    public Order(String deliveryAddress, String deliveryPhone, Long totalPrice, OrderStatus status, Users user) {
         this.deliveryAddress = deliveryAddress;
         this.deliveryPhone = deliveryPhone;
         this.totalPrice = totalPrice;
         this.status = status;
         this.user = user;
-        this.orderProducts = orderProducts;
     }
 
     public static Order addOrder(String deliveryAddress, String deliveryPhone, Users user, List<OrderProduct> orderProducts) {
         Order order = new Order();
         order.addInfo(deliveryAddress, deliveryPhone);
         order.addUser(user);
-        order.addOrderProducts(orderProducts);
         order.addTotalPrice(orderProducts);
         return order;
     }
@@ -66,11 +61,6 @@ public class Order extends BaseTimeEntity {
         this.totalPrice = orderProducts.stream()
                 .mapToLong(p -> p.getUnitPrice() * p.getUnitCount())
                 .sum();
-    }
-
-    private void addOrderProducts(List<OrderProduct> orderProducts) {
-        this.orderProducts = orderProducts;
-        orderProducts.forEach(p -> p.addOrder(this));
     }
 
     private void addUser(Users user) {
@@ -82,6 +72,5 @@ public class Order extends BaseTimeEntity {
         this.deliveryPhone = deliveryPhone;
         this.status = PAYMENT;
     }
-
 
 }

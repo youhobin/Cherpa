@@ -3,6 +3,7 @@ package com.cerpha.cerphaproject.cerpha.order.service;
 import com.cerpha.cerphaproject.cerpha.order.domain.Order;
 import com.cerpha.cerphaproject.cerpha.order.domain.OrderProduct;
 import com.cerpha.cerphaproject.cerpha.order.domain.OrderStatus;
+import com.cerpha.cerphaproject.cerpha.order.repository.OrderProductRepository;
 import com.cerpha.cerphaproject.cerpha.order.repository.OrderRepository;
 import com.cerpha.cerphaproject.cerpha.order.request.AddOrderRequest;
 import com.cerpha.cerphaproject.cerpha.product.repository.ProductRepository;
@@ -23,11 +24,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final OrderProductRepository orderProductRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, ProductRepository productRepository, OrderProductRepository orderProductRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.orderProductRepository = orderProductRepository;
     }
 
     @Transactional
@@ -43,6 +46,10 @@ public class OrderService {
         Order order = Order.addOrder(request.getDeliveryAddress(), request.getDeliveryPhone(), user, orderProducts);
 
         orderRepository.save(order);
+
+        orderProducts.forEach(orderProduct -> orderProduct.addOrder(order));
+
+        orderProductRepository.saveAll(orderProducts);
     }
 
 }
