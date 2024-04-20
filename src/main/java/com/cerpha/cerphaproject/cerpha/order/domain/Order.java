@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 import static com.cerpha.cerphaproject.cerpha.order.domain.OrderStatus.*;
@@ -51,35 +53,23 @@ public class Order extends BaseTimeEntity {
         this.user = user;
     }
 
-    public static Order addOrder(String deliveryAddress, String deliveryPhone, Users user, List<OrderProduct> orderProducts) {
-        Order order = new Order();
-        order.addInfo(deliveryAddress, deliveryPhone);
-        order.addUser(user);
-        order.addTotalPrice(orderProducts);
-        return order;
-    }
-
-    private void addTotalPrice(List<OrderProduct> orderProducts) {
-        this.totalPrice = orderProducts.stream()
-                .mapToLong(p -> p.getUnitPrice() * p.getUnitCount())
-                .sum();
-    }
-
-    private void addUser(Users user) {
-        this.user = user;
-    }
-
-    private void addInfo(String deliveryAddress, String deliveryPhone) {
-        this.deliveryAddress = deliveryAddress;
-        this.deliveryPhone = deliveryPhone;
-        this.status = PAYMENT;
-    }
-
     public void cancel() {
         if (!this.status.equals(PAYMENT)) {
             throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
         }
 
         this.status = CANCEL;
+    }
+
+    public boolean isRefundable(LocalDate now) {
+        LocalDate updatedAt = this.getUpdatedAt().toLocalDate();
+
+        int daysDiff = Period.between(updatedAt, now).getDays();
+
+        if (this.status.equals(DONE) && daysDiff <= 1) {
+            return true;
+        }
+
+        return false;
     }
 }
