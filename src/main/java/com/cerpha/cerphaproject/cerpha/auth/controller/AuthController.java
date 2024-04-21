@@ -1,7 +1,9 @@
 package com.cerpha.cerphaproject.cerpha.auth.controller;
 
 import com.cerpha.cerphaproject.cerpha.auth.request.EmailRequest;
+import com.cerpha.cerphaproject.cerpha.auth.request.ReissueTokenRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
+import com.cerpha.cerphaproject.cerpha.auth.response.TokenResponse;
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import jakarta.servlet.http.HttpSession;
@@ -41,5 +43,12 @@ public class AuthController {
         authService.signup(userRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
+    }
+
+    @PostMapping("/users/reissue")
+    public ResponseEntity<ResultDto<TokenResponse>> reissueToken(@RequestBody ReissueTokenRequest reissueTokenRequest) {
+        TokenResponse tokenResponse = authService.reissueToken(reissueTokenRequest);
+
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, tokenResponse));
     }
 }
