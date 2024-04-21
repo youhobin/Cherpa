@@ -44,5 +44,4 @@ public class OrderProduct {
         this.order = order;
     }
 
-
 }

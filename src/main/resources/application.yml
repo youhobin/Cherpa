@@ -41,6 +41,8 @@ env:
       감사합니다.
   encryption:
     key: "sherpaprojectforclimbingshopping"
+  order:
+    changeStatusCycle: 0 0 0 * * ?
 
 logging:
   level:
