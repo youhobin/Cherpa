@@ -27,6 +27,10 @@ spring:
             enable: true
           ssl:
             trust: smtp.gmail.com
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 env:
   mail:

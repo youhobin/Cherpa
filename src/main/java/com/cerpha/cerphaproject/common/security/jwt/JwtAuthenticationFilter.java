@@ -2,6 +2,7 @@ package com.cerpha.cerphaproject.common.security.jwt;
 
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -41,7 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && isValidatedToken(token)) {
             log.info("토큰 유효성 검사 통과");
-            Claims claims = parseClaims(token);
+            Claims claims = null;
+            try {
+                claims = parseClaims(token);
+            } catch (RedisConnectionFailureException e) {
+                log.error(e.getMessage());
+                // todo catch exception 바꾸기
+                throw new RuntimeException();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw new RuntimeException();
+            }
 
             Users user = authService.getUserById(Long.valueOf(claims.getSubject()));
             SecurityContextHolder.getContext()
@@ -57,16 +69,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         byte[] secretKeyBytes = Base64.getEncoder().encode(env.getProperty("token.secret").getBytes());
         SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
 
-        try {
-            return Jwts.parser()
-                    .setSigningKey(signingKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            log.info("JWT Token Exception");
-            return e.getClaims();
-        }
+        return Jwts.parser()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+//        try {
+//            return Jwts.parser()
+//                    .setSigningKey(signingKey)
+//                    .build()
+//                    .parseClaimsJws(token)
+//                    .getBody();
+//        } catch (ExpiredJwtException e) {
+//            log.info("JWT Token Exception");
+//            return e.getClaims();
+//        }
 
     }
 

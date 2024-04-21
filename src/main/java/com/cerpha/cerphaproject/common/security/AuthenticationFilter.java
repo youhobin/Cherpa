@@ -4,7 +4,9 @@ import com.cerpha.cerphaproject.cerpha.auth.request.LoginRequest;
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
+import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.cerpha.cerphaproject.common.security.jwt.JwtToken;
+import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,18 +37,18 @@ import java.util.Date;
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final String ACCESS_TOKEN_EXPIRATION = "token.access_token.expiration_time";
-    private final String REFRESH_TOKEN_EXPIRATION = "token.refresh_token.expiration_time";
-
-    private AuthService authService;
-    private Environment environment;
+    private final AuthService authService;
+    private final RedisService redisService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
                                 AuthService authService,
-                                Environment environment) {
+                                RedisService redisService,
+                                JwtTokenProvider jwtTokenProvider) {
         super(authenticationManager);
         this.authService = authService;
-        this.environment = environment;
+        this.redisService = redisService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -64,33 +67,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) throws IOException {
         String username = ((User) authResult.getPrincipal()).getUsername();
         Users user = authService.getUserDetailsByEmail(username);
 
-        byte[] secretKeyBytes = Base64.getEncoder().encode(environment.getProperty("token.secret").getBytes());
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()));
+        String refreshToken = jwtTokenProvider.generateRefreshToken();
 
-        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyBytes);
-
-        Instant now = Instant.now();
-
-        String accessToken = Jwts.builder()
-                .subject(String.valueOf(user.getId()))
-                .expiration(Date.from(now.plusMillis(Long.parseLong(environment.getProperty(ACCESS_TOKEN_EXPIRATION)))))
-                .issuedAt(Date.from(now))
-                .signWith(secretKey)
-                .compact();
-
-        String refreshToken = Jwts.builder()
-                .expiration(Date.from(now.plusMillis(Long.parseLong(environment.getProperty(REFRESH_TOKEN_EXPIRATION)))))
-                .issuedAt(Date.from(now))
-                .signWith(secretKey)
-                .compact();
+        redisService.saveRefreshToken(String.valueOf(user.getId()), refreshToken);
 
         JwtToken jwtToken = new JwtToken(accessToken, refreshToken);
 
-        response.addHeader("accessToken", accessToken);
-        response.addHeader("userId", String.valueOf(user.getId()));
+//        response.addHeader("accessToken", accessToken);
+//        response.addHeader("userId", String.valueOf(user.getId()));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
