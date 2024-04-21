@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("토큰 유효성 검사 통과");
             Claims claims = parseClaims(token);
 
-
             Users user = authService.getUserById(Long.valueOf(claims.getSubject()));
             SecurityContextHolder.getContext()
                     .setAuthentication(
@@ -65,6 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
+            log.info("JWT Token Exception");
             return e.getClaims();
         }
 
