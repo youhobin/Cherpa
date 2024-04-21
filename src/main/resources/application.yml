@@ -27,6 +27,10 @@ spring:
             enable: true
           ssl:
             trust: smtp.gmail.com
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 env:
   mail:
@@ -50,5 +54,8 @@ logging:
     org.hibernate.type: trace
 
 token:
-  expiration_time: 86400000
   secret: sherpaprojectforclimbingshoppingmallshop
+  access_token:
+    expiration_time: 86400000
+  refresh_token:
+    expiration_time: 86400000

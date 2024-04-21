@@ -1,10 +1,13 @@
 package com.cerpha.cerphaproject.common.security;
 
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
+import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.cerpha.cerphaproject.common.security.jwt.JwtAuthenticationFilter;
+import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,14 +22,19 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class WebSecurity {
 
-    private AuthService authService;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private Environment env;
+    private final AuthService authService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final Environment env;
+    private final RedisService redisService;
 
-    public WebSecurity(Environment env, AuthService authService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public WebSecurity(Environment env,
+                       AuthService authService,
+                       BCryptPasswordEncoder bCryptPasswordEncoder,
+                       RedisService redisService) {
         this.env = env;
         this.authService = authService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.redisService = redisService;
     }
 
     @Bean
@@ -64,7 +72,7 @@ public class WebSecurity {
     }
 
     private AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager) {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, authService, env);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, authService, redisService, new JwtTokenProvider(env));
         authenticationFilter.setFilterProcessesUrl("/auth/users/login");
         return authenticationFilter;
     }

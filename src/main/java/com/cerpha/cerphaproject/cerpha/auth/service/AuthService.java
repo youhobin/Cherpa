@@ -2,12 +2,14 @@ package com.cerpha.cerphaproject.cerpha.auth.service;
 
 import com.cerpha.cerphaproject.cerpha.auth.repository.AuthRepository;
 import com.cerpha.cerphaproject.cerpha.auth.request.EmailRequest;
+import com.cerpha.cerphaproject.cerpha.auth.request.ReissueTokenRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
+import com.cerpha.cerphaproject.cerpha.auth.response.TokenResponse;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.domain.UserRole;
-import com.cerpha.cerphaproject.common.encryption.AESEncryption;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
-import com.cerpha.cerphaproject.common.exception.ExceptionCode;
+import com.cerpha.cerphaproject.common.redis.RedisService;
+import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,13 +43,18 @@ public class AuthService implements UserDetailsService {
     private final AuthRepository authRepository;
     private final JavaMailSender mailSender;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final RedisService redisService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AuthService(AuthRepository authRepository,
                        JavaMailSender mailSender,
-                       BCryptPasswordEncoder passwordEncoder) {
+                       BCryptPasswordEncoder passwordEncoder,
+                       RedisService redisService, JwtTokenProvider jwtTokenProvider) {
         this.authRepository = authRepository;
         this.mailSender = mailSender;
         this.passwordEncoder = passwordEncoder;
+        this.redisService = redisService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Transactional
@@ -113,6 +120,18 @@ public class AuthService implements UserDetailsService {
     public Users getUserById(Long id) {
         return authRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER.getMessage()));
+    }
+
+    public TokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
+        Long userId = reissueTokenRequest.getUserId();
+
+        String refreshToken = redisService.getRefreshToken(String.valueOf(userId));
+        if (refreshToken == null || !refreshToken.equals(reissueTokenRequest.getRefreshToken())) {
+            throw new BusinessException(INVALID_REFRESH_TOKEN);
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
+        return new TokenResponse(userId, accessToken);
     }
 
     private int createAuthNumber() {

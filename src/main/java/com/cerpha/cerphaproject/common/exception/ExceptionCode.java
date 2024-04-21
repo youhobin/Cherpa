@@ -14,6 +14,7 @@ public enum ExceptionCode {
     DUPLICATED_EMAIL(400,"U002","중복된 이메일 입니다."),
     NOT_EQUAL_NEW_PASSWORD(400, "U003", "변경할 비밀번호가 일치하지 않습니다."),
     NOT_EQUAL_PREV_PASSWORD(400, "U004", "기존 비밀번호와 일치하지 않습니다."),
+    INVALID_REFRESH_TOKEN(400, "U005", "유효하지 않은 Refresh Token 입니다."),
 
     // product
     NOT_FOUND_PRODUCT(404, "P001", "상품을 찾을 수 없습니다."),
