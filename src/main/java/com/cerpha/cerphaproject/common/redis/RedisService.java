@@ -21,4 +21,16 @@ public class RedisService {
     public String getRefreshToken(String userId) {
         return redisTemplate.opsForValue().get(userId);
     }
+
+    public void saveEmailAuthNumber(String email, int authNumber) {
+        redisTemplate.opsForValue().set(email, String.valueOf(authNumber), Duration.ofMinutes(10));
+    }
+
+    public String getEmailInfo(String email) {
+        return redisTemplate.opsForValue().get(email);
+    }
+
+    public void saveIsEmailVerified(String email, boolean isVerified) {
+        redisTemplate.opsForValue().set(email, String.valueOf(isVerified), Duration.ofMinutes(10));
+    }
 }

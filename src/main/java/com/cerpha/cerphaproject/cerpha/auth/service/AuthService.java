@@ -5,12 +5,12 @@ import com.cerpha.cerphaproject.cerpha.auth.request.EmailRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.ReissueTokenRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
 import com.cerpha.cerphaproject.cerpha.auth.response.TokenResponse;
+import com.cerpha.cerphaproject.cerpha.auth.response.VerifyEmailResponse;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.domain.UserRole;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -58,24 +58,7 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public void signup(SignUpUserRequest userRequest) {
-        if (authRepository.findByEmail(userRequest.getEmail()).isPresent()) {
-            throw new BusinessException(DUPLICATED_EMAIL);
-        }
-        Users user = Users.builder()
-                .email(userRequest.getEmail())
-                .password(passwordEncoder.encode(userRequest.getPassword()))
-                .name(userRequest.getName())
-                .nickname(userRequest.getNickname())
-                .phone(userRequest.getPhone())
-                .address(userRequest.getAddress())
-                .role(UserRole.USER)
-                .build();
-
-        authRepository.save(user);
-    }
-
-    public int sendEmail(String email) {
+    public void sendEmail(String email) {
         if (authRepository.findByEmail(email).isPresent()) {
             throw new BusinessException(DUPLICATED_EMAIL);
         }
@@ -90,16 +73,60 @@ public class AuthService implements UserDetailsService {
 
         mailSender.send(message);
 
-        return randomNumber;
+        redisService.saveEmailAuthNumber(email, randomNumber);
     }
 
-    public boolean verifyEmail(EmailRequest emailRequest, HttpSession session) {
-        Integer savedAuthNum = (Integer) session.getAttribute(emailRequest.getEmail());
+    @Transactional
+    public VerifyEmailResponse verifyEmail(EmailRequest request) {
+        String authNumber = redisService.getEmailInfo(request.getEmail());
 
-        if (savedAuthNum != null && emailRequest.getAuthNumber() == savedAuthNum) {
-            return true;
+        boolean isVerified = authNumber.equals(String.valueOf(request.getAuthNumber()));
+        if (!isVerified) {
+            throw new BusinessException(INVALID_AUTH_NUMBER);
         }
-        return false;
+
+        redisService.saveIsEmailVerified(request.getEmail(), true);
+
+
+        return new VerifyEmailResponse(true);
+    }
+
+    @Transactional
+    public void signup(SignUpUserRequest userRequest) {
+        if (authRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+            throw new BusinessException(DUPLICATED_EMAIL);
+        }
+
+        String isVerified = redisService.getEmailInfo(userRequest.getEmail());
+
+        if (!Boolean.parseBoolean(isVerified)) {
+            throw new BusinessException(NOT_AUTH_EMAIL);
+        }
+
+        Users user = Users.builder()
+                .email(userRequest.getEmail())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .name(userRequest.getName())
+                .nickname(userRequest.getNickname())
+                .phone(userRequest.getPhone())
+                .address(userRequest.getAddress())
+                .role(UserRole.USER)
+                .build();
+
+        authRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public TokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
+        Long userId = reissueTokenRequest.getUserId();
+
+        String refreshToken = redisService.getRefreshToken(String.valueOf(userId));
+        if (refreshToken == null || !refreshToken.equals(reissueTokenRequest.getRefreshToken())) {
+            throw new BusinessException(INVALID_REFRESH_TOKEN);
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
+        return new TokenResponse(userId, accessToken);
     }
 
     @Override
@@ -120,18 +147,6 @@ public class AuthService implements UserDetailsService {
     public Users getUserById(Long id) {
         return authRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER.getMessage()));
-    }
-
-    public TokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
-        Long userId = reissueTokenRequest.getUserId();
-
-        String refreshToken = redisService.getRefreshToken(String.valueOf(userId));
-        if (refreshToken == null || !refreshToken.equals(reissueTokenRequest.getRefreshToken())) {
-            throw new BusinessException(INVALID_REFRESH_TOKEN);
-        }
-
-        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
-        return new TokenResponse(userId, accessToken);
     }
 
     private int createAuthNumber() {
