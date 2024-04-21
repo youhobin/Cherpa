@@ -94,6 +94,11 @@ public class WishlistService {
         wishlistRepository.deleteByUserIdAndProductId(request.getUserId(), request.getProductId());
     }
 
+    @Transactional
+    public void deleteAllWishList(Long userId) {
+        wishlistRepository.deleteByUserId(userId);
+    }
+
     private long getTotalPrice(List<Wishlist> wishlists) {
         return wishlists.stream()
                 .mapToLong(w -> w.getUnitCount() * w.getProduct().getPrice())
