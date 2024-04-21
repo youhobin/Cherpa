@@ -128,10 +128,7 @@ public class OrderService {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         LocalDateTime start = yesterday.atStartOfDay();
-        log.info("start={}", start);
-
         LocalDateTime end = yesterday.atTime(LocalTime.MAX);
-        log.info("end={}", end);
 
         List<Order> shippingOrders = orderRepository.findOrdersByStatusAndUpdatedAtBetween(SHIPPING, start, end);
         log.info("shippingOrders={}", shippingOrders.size());
