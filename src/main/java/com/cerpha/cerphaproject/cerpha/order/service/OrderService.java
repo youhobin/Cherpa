@@ -15,13 +15,18 @@ import com.cerpha.cerphaproject.cerpha.user.request.OrderListRequest;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import com.cerpha.cerphaproject.common.exception.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 
 import static com.cerpha.cerphaproject.cerpha.order.domain.OrderStatus.PAYMENT;
+import static com.cerpha.cerphaproject.cerpha.order.domain.OrderStatus.SHIPPING;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -114,6 +119,29 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
         order.cancel();
+    }
+
+    @Scheduled(cron = "${env.order.changeStatusCycle}")
+    @Transactional
+    public void updateOrderStatus() {
+        log.info("Update OrderStatus Scheduling");
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+
+        LocalDateTime start = yesterday.atStartOfDay();
+        log.info("start={}", start);
+
+        LocalDateTime end = yesterday.atTime(LocalTime.MAX);
+        log.info("end={}", end);
+
+        List<Order> shippingOrders = orderRepository.findOrdersByStatusAndUpdatedAtBetween(SHIPPING, start, end);
+        log.info("shippingOrders={}", shippingOrders.size());
+
+        shippingOrders.forEach(Order::finishDelivery);
+
+        List<Order> paymentOrders = orderRepository.findOrdersByStatusAndUpdatedAtBetween(PAYMENT, start, end);
+        log.info("paymentOrders={}", paymentOrders.size());
+
+        paymentOrders.forEach(Order::startDelivery);
     }
 
     private List<OrderResponse> sortOrderResponse(List<OrderResponse> orderResponses) {

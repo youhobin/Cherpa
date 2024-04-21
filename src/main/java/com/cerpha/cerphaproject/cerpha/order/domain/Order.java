@@ -76,4 +76,12 @@ public class Order extends BaseTimeEntity {
     public void requestRefund() {
         this.status = REFUNDING;
     }
+
+    public void finishDelivery() {
+        this.status = DONE;
+    }
+
+    public void startDelivery() {
+        this.status = SHIPPING;
+    }
 }
