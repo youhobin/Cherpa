@@ -2,21 +2,22 @@ package com.cerpha.cerphaproject.common.security.jwt;
 
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
+import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.exception.ExceptionResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
@@ -24,6 +25,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.*;
 
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -48,11 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 claims = parseClaims(token);
             } catch (RedisConnectionFailureException e) {
                 log.error(e.getMessage());
-                // todo catch exception 바꾸기
-                throw new RuntimeException();
             } catch (Exception e) {
                 log.error(e.getMessage());
-                throw new RuntimeException();
             }
 
             Users user = authService.getUserById(Long.valueOf(claims.getSubject()));
@@ -74,21 +74,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
-//        try {
-//            return Jwts.parser()
-//                    .setSigningKey(signingKey)
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody();
-//        } catch (ExpiredJwtException e) {
-//            log.info("JWT Token Exception");
-//            return e.getClaims();
-//        }
-
     }
 
-    private boolean isValidatedToken(String token) {
+    private boolean isValidatedToken(String token) throws IOException {
         byte[] secretKeyBytes = Base64.getEncoder().encode(env.getProperty("token.secret").getBytes());
         SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
 
@@ -104,6 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             subject = jwtParser.parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
             returnValue = false;
+            throw e;
         }
 
         if (subject == null || subject.isEmpty()) {

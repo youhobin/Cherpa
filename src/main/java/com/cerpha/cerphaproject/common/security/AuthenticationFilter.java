@@ -4,6 +4,8 @@ import com.cerpha.cerphaproject.cerpha.auth.request.LoginRequest;
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.exception.ExceptionResponse;
 import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.cerpha.cerphaproject.common.security.jwt.JwtToken;
 import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
@@ -19,6 +21,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +36,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.INVALID_CREDENTIALS;
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.INVALID_REQUEST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -60,6 +67,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new BusinessException(INVALID_CREDENTIALS);
         }
     }
 
@@ -78,8 +87,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         JwtToken jwtToken = new JwtToken(accessToken, refreshToken);
 
-//        response.addHeader("accessToken", accessToken);
-//        response.addHeader("userId", String.valueOf(user.getId()));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 

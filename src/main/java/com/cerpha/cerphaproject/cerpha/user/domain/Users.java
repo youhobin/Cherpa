@@ -58,13 +58,6 @@ public class Users extends BaseTimeEntity {
         this.role = role;
     }
 
-    public void encryptPrivacy(AESEncryption aesEncryption) throws Exception {
-        this.email = aesEncryption.encrypt(email);
-        this.name = aesEncryption.encrypt(name);
-        this.phone = aesEncryption.encrypt(phone);
-        this.address = aesEncryption.encrypt(address);
-    }
-
     public void updateProfile(UpdateProfileRequest request) {
         this.address = request.getAddress();
         this.phone = request.getPhone();
