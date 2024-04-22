@@ -65,7 +65,7 @@ public class WebSecurity {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(getAuthenticationFilter(authenticationManager))
-                .addFilterBefore(new JwtAuthenticationFilter(env, authService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(env, authService, redisService), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> {
                     handler.accessDeniedHandler(accessDeniedHandler());
                 });

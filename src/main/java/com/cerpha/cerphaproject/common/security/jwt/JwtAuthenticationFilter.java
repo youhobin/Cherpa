@@ -5,6 +5,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import com.cerpha.cerphaproject.common.exception.ExceptionResponse;
+import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
@@ -33,10 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final Environment env;
     private final AuthService authService;
+    private final RedisService redisService;
 
-    public JwtAuthenticationFilter(Environment env, AuthService authService) {
+    public JwtAuthenticationFilter(Environment env, AuthService authService, RedisService redisService) {
         this.env = env;
         this.authService = authService;
+        this.redisService = redisService;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("JWT 인증 필터");
         String token = resolveToken(request);
 
-        if (token != null && isValidatedToken(token)) {
+        if (token != null && isValidatedToken(token) && !redisService.hasKeyBlackList(token)) {
             log.info("토큰 유효성 검사 통과");
             Claims claims = null;
             try {
