@@ -11,6 +11,7 @@ import com.cerpha.cerphaproject.cerpha.product.repository.ProductRepository;
 import com.cerpha.cerphaproject.cerpha.user.domain.UserRole;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -97,7 +98,7 @@ public class OrderServiceTest {
                     orderService.addOrder(addOrderRequest);
                     successCount.getAndIncrement();
                     System.out.println("성공");
-                } catch (Exception e) {
+                } catch (BusinessException e) {
                     failCount.getAndIncrement();
                     System.out.println("실패");
                 } finally {
