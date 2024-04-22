@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
@@ -24,4 +25,12 @@ public class AddOrderRequest {
 
     @Valid
     List<AddOrderProductRequest> orderProducts;
+
+    @Builder
+    public AddOrderRequest(Long userId, String deliveryAddress, String deliveryPhone, List<AddOrderProductRequest> orderProducts) {
+        this.userId = userId;
+        this.deliveryAddress = deliveryAddress;
+        this.deliveryPhone = deliveryPhone;
+        this.orderProducts = orderProducts;
+    }
 }

@@ -23,6 +23,7 @@ public enum ExceptionCode {
 
     // product
     NOT_FOUND_PRODUCT(404, "P001", "상품을 찾을 수 없습니다."),
+    OUT_OF_STOCK(404, "P002", "상품의 재고가 부족합니다."),
 
     // wishlist
     DUPLICATED_WISHLIST_PRODUCT(400, "W001", "이미 WishList에 등록된 상품입니다."),

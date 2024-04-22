@@ -13,7 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        default_batch_fetch_size: 100
+        default_batch_fetch_size: 1000
+        show_sql: true
   mail:
     host: smtp.gmail.com
     port: 587
@@ -59,3 +60,25 @@ token:
     expiration_time: 86400000
   refresh_token:
     expiration_time: 86400000
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+        show_sql: true

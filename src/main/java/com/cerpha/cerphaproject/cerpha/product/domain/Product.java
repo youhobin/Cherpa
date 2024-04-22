@@ -1,14 +1,20 @@
 package com.cerpha.cerphaproject.cerpha.product.domain;
 
 import com.cerpha.cerphaproject.cerpha.BaseTimeEntity;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "products")
 public class Product extends BaseTimeEntity {
 
@@ -27,7 +33,11 @@ public class Product extends BaseTimeEntity {
 
     public void decreaseStock(Long unitCount) {
         long remainingStock = this.stock - unitCount;
+
         // todo 재고가 0보다 작게되면 exception 발생
+        if (remainingStock < 0) {
+            throw new BusinessException(OUT_OF_STOCK);
+        }
         this.stock = remainingStock;
     }
 
