@@ -34,7 +34,6 @@ public class Product extends BaseTimeEntity {
     public void decreaseStock(Long unitCount) {
         long remainingStock = this.stock - unitCount;
 
-        // todo 재고가 0보다 작게되면 exception 발생
         if (remainingStock < 0) {
             throw new BusinessException(OUT_OF_STOCK);
         }

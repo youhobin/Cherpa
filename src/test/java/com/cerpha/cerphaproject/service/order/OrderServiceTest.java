@@ -1,4 +1,4 @@
-package com.cerpha.cerphaproject.order.service;
+package com.cerpha.cerphaproject.service.order;
 
 import com.cerpha.cerphaproject.cerpha.order.domain.Order;
 import com.cerpha.cerphaproject.cerpha.order.repository.OrderProductRepository;
@@ -13,6 +13,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.Users;
 import com.cerpha.cerphaproject.cerpha.user.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +54,7 @@ public class OrderServiceTest {
         userRepository.deleteAllInBatch();
     }
 
+    @DisplayName("주문 시 동시성 테스트")
     @Test
     public void order() throws InterruptedException {
         // given
@@ -93,7 +95,6 @@ public class OrderServiceTest {
             executorService.execute(() -> {
                 try {
                     orderService.addOrder(addOrderRequest);
-                    System.out.println("Qwer" + productRepository.findById(1L).get().getStock());
                     successCount.getAndIncrement();
                     System.out.println("성공");
                 } catch (Exception e) {
