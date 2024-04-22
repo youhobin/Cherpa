@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .getBody();
     }
 
-    private boolean isValidatedToken(String token) {
+    private boolean isValidatedToken(String token) throws IOException {
         byte[] secretKeyBytes = Base64.getEncoder().encode(env.getProperty("token.secret").getBytes());
         SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
 

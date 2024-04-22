@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> businessExceptionHandler(BusinessException e) {
         log.error("BusinessExceptionHandler", e);
 
-        return ResponseEntity.status(BAD_REQUEST).body(new ExceptionResponse(e.getExceptionCode()));
+        return ResponseEntity.status(e.getExceptionCode().getStatus()).body(new ExceptionResponse(e.getExceptionCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
