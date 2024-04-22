@@ -6,6 +6,8 @@ import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
 import com.cerpha.cerphaproject.cerpha.user.response.UserProfileResponse;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.redis.RedisService;
+import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,11 +22,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final RedisService redisService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, RedisService redisService, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.redisService = redisService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +53,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(Long userId, UpdatePasswordRequest request) {
+    public void updatePassword(Long userId, UpdatePasswordRequest request, String token) {
         if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
             throw new BusinessException(NOT_EQUAL_NEW_PASSWORD);
         }
@@ -60,6 +66,11 @@ public class UserService {
         }
 
         user.changePassword(request);
+
+        String accessToken = token.substring(7);
+        long time = jwtTokenProvider.parseClaims(accessToken).getExpiration().getTime() - System.currentTimeMillis();
+        redisService.setBlackList(accessToken, String.valueOf(user.getId()), time);
+        redisService.deleteRefreshToken(String.valueOf(user.getId()));
     }
 
     private boolean isEqualPassword(UpdatePasswordRequest request, Users user) {
