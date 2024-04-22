@@ -58,12 +58,12 @@ public class Users extends BaseTimeEntity {
         this.role = role;
     }
 
-    public void updateProfile(UpdateProfileRequest request) {
-        this.address = request.getAddress();
-        this.phone = request.getPhone();
+    public void updateProfile(String address, String phone) {
+        this.address = address;
+        this.phone = phone;
     }
 
-    public void changePassword(UpdatePasswordRequest request) {
-        this.password = request.getNewPassword();
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
     }
 }

@@ -44,7 +44,7 @@ public class UserService {
     public void updateUserProfile(Long userId, UpdateProfileRequest request) {
         Users user = getUserById(userId);
 
-        user.updateProfile(request);
+        user.updateProfile(request.getAddress(), request.getPhone());
     }
 
     private Users getUserById(Long userId) {
@@ -65,7 +65,7 @@ public class UserService {
             throw new BusinessException(NOT_EQUAL_PREV_PASSWORD);
         }
 
-        user.changePassword(request);
+        user.changePassword(request.getNewPassword());
 
         String accessToken = token.substring(7);
         long time = jwtTokenProvider.parseClaims(accessToken).getExpiration().getTime() - System.currentTimeMillis();
