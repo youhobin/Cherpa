@@ -37,8 +37,9 @@ public class UserController {
 
     @PutMapping("/users/{userId}/password")
     public ResponseEntity<ResultDto> updateUserPassword(@PathVariable("userId") Long userId,
-                                                        @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
-        userService.updatePassword(userId, updatePasswordRequest);
+                                                        @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest,
+                                                        @RequestHeader(value = "Authorization") String token) {
+        userService.updatePassword(userId, updatePasswordRequest, token);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 

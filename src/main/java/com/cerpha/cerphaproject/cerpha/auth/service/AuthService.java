@@ -137,7 +137,7 @@ public class AuthService implements UserDetailsService {
         String userId = accessTokenClaims.getSubject();
         long time = accessTokenClaims.getExpiration().getTime() - System.currentTimeMillis();
         redisService.setBlackList(logoutRequest.getAccessToken(), userId, time);
-        redisService.deleteRefreshToken(logoutRequest.getRefreshToken());
+        redisService.deleteRefreshToken(userId);
     }
 
     @Override

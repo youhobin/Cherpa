@@ -15,8 +15,8 @@ public class RedisService {
         this.redisTemplate = redisTemplate;
     }
 
-    public void saveRefreshToken(String refreshToken, String userId) {
-        redisTemplate.opsForValue().set(refreshToken, userId, Duration.ofDays(1));
+    public void saveRefreshToken(String userId, String refreshToken) {
+        redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofDays(1));
     }
 
     public String getRefreshToken(String userId) {
@@ -35,8 +35,8 @@ public class RedisService {
         redisTemplate.opsForValue().set(email, String.valueOf(isVerified), Duration.ofMinutes(10));
     }
 
-    public void deleteRefreshToken(String refreshToken) {
-        redisTemplate.delete(refreshToken);
+    public void deleteRefreshToken(String userId) {
+        redisTemplate.delete(userId);
     }
 
     public void setBlackList(String accessToken, String userId, long time) {
