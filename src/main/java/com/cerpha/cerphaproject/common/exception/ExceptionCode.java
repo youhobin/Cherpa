@@ -8,6 +8,9 @@ public enum ExceptionCode {
     // common
     AES_ENCRYPTION_ERROR(500, "C001", "Encryption 오류"),
     INVALID_REQUEST(400, "C002", "유효하지 않은 입력 값입니다."),
+    INVALID_CREDENTIALS(401, "C003", "사용자 아이디 또는 비밀번호가 잘못되었습니다."),
+    REDIS_CONNECTION_FAIL(500, "C004", "레디스 연결 실패"),
+    FORBIDDEN(403, "C005", "권한이 없습니다."),
 
     // user
     NOT_FOUND_USER(404, "U001", "사용자를 찾을 수 없습니다."),

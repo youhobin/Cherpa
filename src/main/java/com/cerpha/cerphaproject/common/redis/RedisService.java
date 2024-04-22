@@ -4,18 +4,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisService(RedisTemplate redisTemplate) {
+    public RedisService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    public void saveRefreshToken(String userId, String refreshToken) {
-        redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofDays(1));
+    public void saveRefreshToken(String refreshToken, String userId) {
+        redisTemplate.opsForValue().set(refreshToken, userId, Duration.ofDays(1));
     }
 
     public String getRefreshToken(String userId) {
@@ -32,5 +33,17 @@ public class RedisService {
 
     public void saveIsEmailVerified(String email, boolean isVerified) {
         redisTemplate.opsForValue().set(email, String.valueOf(isVerified), Duration.ofMinutes(10));
+    }
+
+    public void deleteRefreshToken(String refreshToken) {
+        redisTemplate.delete(refreshToken);
+    }
+
+    public void setBlackList(String accessToken, String userId, long time) {
+        redisTemplate.opsForValue().set(accessToken, userId, time, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean hasKeyBlackList(String token) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(token));
     }
 }

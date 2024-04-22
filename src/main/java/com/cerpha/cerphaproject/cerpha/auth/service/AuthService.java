@@ -2,6 +2,7 @@ package com.cerpha.cerphaproject.cerpha.auth.service;
 
 import com.cerpha.cerphaproject.cerpha.auth.repository.AuthRepository;
 import com.cerpha.cerphaproject.cerpha.auth.request.EmailRequest;
+import com.cerpha.cerphaproject.cerpha.auth.request.LogoutRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.ReissueTokenRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
 import com.cerpha.cerphaproject.cerpha.auth.response.TokenResponse;
@@ -11,6 +12,7 @@ import com.cerpha.cerphaproject.cerpha.user.domain.UserRole;
 import com.cerpha.cerphaproject.common.exception.BusinessException;
 import com.cerpha.cerphaproject.common.redis.RedisService;
 import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -127,6 +129,15 @@ public class AuthService implements UserDetailsService {
 
         String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
         return new TokenResponse(userId, accessToken);
+    }
+
+    @Transactional
+    public void logout(LogoutRequest logoutRequest) {
+        Claims accessTokenClaims = jwtTokenProvider.parseClaims(logoutRequest.getAccessToken());
+        String userId = accessTokenClaims.getSubject();
+        long time = accessTokenClaims.getExpiration().getTime() - System.currentTimeMillis();
+        redisService.setBlackList(logoutRequest.getAccessToken(), userId, time);
+        redisService.deleteRefreshToken(logoutRequest.getRefreshToken());
     }
 
     @Override

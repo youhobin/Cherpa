@@ -1,11 +1,15 @@
 package com.cerpha.cerphaproject.common.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
@@ -15,6 +19,8 @@ public class JwtTokenProvider {
 
     private final String ACCESS_TOKEN_EXPIRATION = "token.access_token.expiration_time";
     private final String REFRESH_TOKEN_EXPIRATION = "token.refresh_token.expiration_time";
+    @Value("${token.secret}")
+    private String tokenSecret;
     private final Environment environment;
     private final SecretKey secretKey;
 
@@ -43,6 +49,17 @@ public class JwtTokenProvider {
                 .issuedAt(Date.from(now))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public Claims parseClaims(String token) {
+        byte[] secretKeyBytes = Base64.getEncoder().encode(tokenSecret.getBytes());
+        SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
+
+        return Jwts.parser()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -62,10 +63,13 @@ public class WebSecurity {
                 )
                 .authenticationManager(authenticationManager)
                 .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilter(getAuthenticationFilter(authenticationManager))
+                .addFilterBefore(new JwtAuthenticationFilter(env, authService, redisService), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(handler -> {
+                    handler.accessDeniedHandler(accessDeniedHandler());
+                });
 
-        http.addFilter(getAuthenticationFilter(authenticationManager));
-        http.addFilterBefore(new JwtAuthenticationFilter(env, authService), UsernamePasswordAuthenticationFilter.class);
         http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()));
 
         return http.build();
@@ -75,5 +79,10 @@ public class WebSecurity {
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, authService, redisService, new JwtTokenProvider(env));
         authenticationFilter.setFilterProcessesUrl("/auth/users/login");
         return authenticationFilter;
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
     }
 }

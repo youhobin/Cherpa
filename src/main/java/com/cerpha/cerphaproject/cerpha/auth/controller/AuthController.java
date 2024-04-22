@@ -1,6 +1,7 @@
 package com.cerpha.cerphaproject.cerpha.auth.controller;
 
 import com.cerpha.cerphaproject.cerpha.auth.request.EmailRequest;
+import com.cerpha.cerphaproject.cerpha.auth.request.LogoutRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.ReissueTokenRequest;
 import com.cerpha.cerphaproject.cerpha.auth.request.SignUpUserRequest;
 import com.cerpha.cerphaproject.cerpha.auth.response.TokenResponse;
@@ -49,5 +50,12 @@ public class AuthController {
         TokenResponse tokenResponse = authService.reissueToken(reissueTokenRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, tokenResponse));
+    }
+
+    @PostMapping("/users/logout")
+    public ResponseEntity<ResultDto> logout(@RequestBody LogoutRequest logoutRequest) {
+        authService.logout(logoutRequest);
+
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 }
