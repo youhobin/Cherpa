@@ -16,3 +16,9 @@ services:
       - MARIADB_DATABASE=shop
       - MARIADB_PASSWORD=zaq12wsx
     restart: always
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
