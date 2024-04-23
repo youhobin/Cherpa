@@ -9,11 +9,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
-        default_batch_fetch_size: 100
+        default_batch_fetch_size: 1000
+        show_sql: true
   mail:
     host: smtp.gmail.com
     port: 587
@@ -27,6 +28,10 @@ spring:
             enable: true
           ssl:
             trust: smtp.gmail.com
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 env:
   mail:
@@ -41,6 +46,8 @@ env:
       감사합니다.
   encryption:
     key: "sherpaprojectforclimbingshopping"
+  order:
+    changeStatusCycle: 0 0 0 * * ?
 
 logging:
   level:
@@ -48,5 +55,30 @@ logging:
     org.hibernate.type: trace
 
 token:
-  expiration_time: 86400000
   secret: sherpaprojectforclimbingshoppingmallshop
+  access_token:
+    expiration_time: 86400000
+  refresh_token:
+    expiration_time: 86400000
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+        show_sql: true

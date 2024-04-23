@@ -22,22 +22,29 @@ public class Users extends BaseTimeEntity {
     private Long id;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_email")
     private String email;
 
+    @Column(name = "user_password")
     private String password;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_name")
     private String name;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_phone")
     private String phone;
 
     @Convert(converter = EncryptionConverter.class)
+    @Column(name = "user_address")
     private String address;
 
+    @Column(name = "user_nickname")
     private String nickname;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "user_role")
     private UserRole role;
 
     @Builder
@@ -51,19 +58,12 @@ public class Users extends BaseTimeEntity {
         this.role = role;
     }
 
-    public void encryptPrivacy(AESEncryption aesEncryption) throws Exception {
-        this.email = aesEncryption.encrypt(email);
-        this.name = aesEncryption.encrypt(name);
-        this.phone = aesEncryption.encrypt(phone);
-        this.address = aesEncryption.encrypt(address);
+    public void updateProfile(String address, String phone) {
+        this.address = address;
+        this.phone = phone;
     }
 
-    public void updateProfile(UpdateProfileRequest request) {
-        this.address = request.getAddress();
-        this.phone = request.getPhone();
-    }
-
-    public void changePassword(UpdatePasswordRequest request) {
-        this.password = request.getNewPassword();
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
     }
 }

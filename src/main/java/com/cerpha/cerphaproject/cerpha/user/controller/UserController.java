@@ -2,9 +2,10 @@ package com.cerpha.cerphaproject.cerpha.user.controller;
 
 import com.cerpha.cerphaproject.cerpha.user.request.UpdatePasswordRequest;
 import com.cerpha.cerphaproject.cerpha.user.request.UpdateProfileRequest;
-import com.cerpha.cerphaproject.cerpha.user.response.UserResponse;
+import com.cerpha.cerphaproject.cerpha.user.response.UserProfileResponse;
 import com.cerpha.cerphaproject.common.dto.ResultDto;
 import com.cerpha.cerphaproject.cerpha.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,15 +21,15 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ResultDto<UserResponse>> getUserProfile(@PathVariable("userId") Long userId) {
-        UserResponse userResponse = userService.getUserProfile(userId);
+    public ResponseEntity<ResultDto<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
+        UserProfileResponse userProfileResponse = userService.getUserProfile(userId);
 
-        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userResponse));
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userProfileResponse));
     }
 
     @PutMapping("/users/{userId}")
     public ResponseEntity<ResultDto> updateUserProfile(@PathVariable("userId") Long userId,
-                                                       @RequestBody UpdateProfileRequest updateProfileRequest) {
+                                                       @Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
         userService.updateUserProfile(userId, updateProfileRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
@@ -36,8 +37,9 @@ public class UserController {
 
     @PutMapping("/users/{userId}/password")
     public ResponseEntity<ResultDto> updateUserPassword(@PathVariable("userId") Long userId,
-                                                        @RequestBody UpdatePasswordRequest updatePasswordRequest) {
-        userService.updatePassword(userId, updatePasswordRequest);
+                                                        @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest,
+                                                        @RequestHeader(value = "Authorization") String token) {
+        userService.updatePassword(userId, updatePasswordRequest, token);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 

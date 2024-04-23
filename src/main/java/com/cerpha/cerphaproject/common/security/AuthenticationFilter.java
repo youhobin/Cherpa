@@ -3,6 +3,12 @@ package com.cerpha.cerphaproject.common.security;
 import com.cerpha.cerphaproject.cerpha.auth.request.LoginRequest;
 import com.cerpha.cerphaproject.cerpha.auth.service.AuthService;
 import com.cerpha.cerphaproject.cerpha.user.domain.Users;
+import com.cerpha.cerphaproject.common.dto.ResultDto;
+import com.cerpha.cerphaproject.common.exception.BusinessException;
+import com.cerpha.cerphaproject.common.exception.ExceptionResponse;
+import com.cerpha.cerphaproject.common.redis.RedisService;
+import com.cerpha.cerphaproject.common.security.jwt.JwtToken;
+import com.cerpha.cerphaproject.common.security.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,6 +18,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,23 +31,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.INVALID_CREDENTIALS;
+import static com.cerpha.cerphaproject.common.exception.ExceptionCode.INVALID_REQUEST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private AuthService authService;
-    private Environment environment;
+    private final AuthService authService;
+    private final RedisService redisService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
                                 AuthService authService,
-                                Environment environment) {
+                                RedisService redisService,
+                                JwtTokenProvider jwtTokenProvider) {
         super(authenticationManager);
         this.authService = authService;
-        this.environment = environment;
+        this.redisService = redisService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -45,11 +63,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                                 HttpServletResponse response) throws AuthenticationException {
         try {
             LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
-            log.info("email = {}", loginRequest.getEmail());
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new BusinessException(INVALID_CREDENTIALS);
         }
     }
 
@@ -57,24 +76,21 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) throws IOException {
         String username = ((User) authResult.getPrincipal()).getUsername();
         Users user = authService.getUserDetailsByEmail(username);
 
-        byte[] secretKeyBytes = Base64.getEncoder().encode(environment.getProperty("token.secret").getBytes());
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()));
+        String refreshToken = jwtTokenProvider.generateRefreshToken();
 
-        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyBytes);
+        redisService.saveRefreshToken(String.valueOf(user.getId()), refreshToken);
 
-        Instant now = Instant.now();
+        JwtToken jwtToken = new JwtToken(accessToken, refreshToken);
 
-        String token = Jwts.builder()
-                .subject(String.valueOf(user.getId()))
-                .expiration(Date.from(now.plusMillis(Long.parseLong(environment.getProperty("token.expiration_time")))))
-                .issuedAt(Date.from(now))
-                .signWith(secretKey)
-                .compact();
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        response.addHeader("token", token);
-        response.addHeader("userId", String.valueOf(user.getId()));
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.getWriter().write(objectMapper.writeValueAsString(new ResultDto<>(HttpStatus.OK, jwtToken)));
     }
 }
