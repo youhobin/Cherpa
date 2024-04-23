@@ -54,10 +54,8 @@ public class WebSecurity {
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/email", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/email/verify", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/auth/users/login", "POST")).permitAll()
-                //여기부터는 지우기 ?
-//                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "PUT")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/users/email", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/users/email/verify", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/products/**", "GET")).permitAll()
                         .anyRequest().authenticated()
                 )
