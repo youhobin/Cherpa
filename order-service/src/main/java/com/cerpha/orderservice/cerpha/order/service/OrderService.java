@@ -9,6 +9,7 @@ import com.cerpha.orderservice.cerpha.order.request.OrderListRequest;
 import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderProductResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
+import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
 import com.cerpha.orderservice.common.client.product.ProductClient;
 import com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
@@ -44,12 +45,14 @@ public class OrderService {
     private final UserClient userClient;
     private final ProductClient productClient;
     private final OrderProductRepository orderProductRepository;
+    private final WishlistService wishlistService;
 
-    public OrderService(OrderRepository orderRepository, UserClient userClient, ProductClient productClient, OrderProductRepository orderProductRepository) {
+    public OrderService(OrderRepository orderRepository, UserClient userClient, ProductClient productClient, OrderProductRepository orderProductRepository, WishlistService wishlistService) {
         this.orderRepository = orderRepository;
         this.userClient = userClient;
         this.productClient = productClient;
         this.orderProductRepository = orderProductRepository;
+        this.wishlistService = wishlistService;
     }
 
     @Transactional
@@ -81,6 +84,8 @@ public class OrderService {
                 .toList();
 
         orderProductRepository.saveAll(orderProducts);
+
+        wishlistService.deleteAllWishList(userId);
     }
 
     @Transactional(readOnly = true)
