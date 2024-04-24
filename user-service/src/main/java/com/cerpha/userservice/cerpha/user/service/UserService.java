@@ -73,8 +73,15 @@ public class UserService {
         redisService.deleteRefreshToken(String.valueOf(user.getId()));
     }
 
+    @Transactional(readOnly = true)
+    public Long getUserId(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
+
+        return user.getId();
+    }
+
     private boolean isEqualPassword(UpdatePasswordRequest request, Users user) {
         return passwordEncoder.matches(request.getPrevPassword(), user.getPassword());
     }
-
 }
