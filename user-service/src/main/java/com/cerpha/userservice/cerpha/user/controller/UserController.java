@@ -20,6 +20,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * 마이페이지 조회
+     * @param userId
+     * @return
+     */
     @GetMapping("/users/{userId}")
     public ResponseEntity<ResultDto<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
         UserProfileResponse userProfileResponse = userService.getUserProfile(userId);
@@ -27,6 +32,12 @@ public class UserController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, userProfileResponse));
     }
 
+    /**
+     * 마이페이지 수정
+     * @param userId
+     * @param updateProfileRequest
+     * @return
+     */
     @PutMapping("/users/{userId}")
     public ResponseEntity<ResultDto> updateUserProfile(@PathVariable("userId") Long userId,
                                                        @Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
@@ -35,6 +46,13 @@ public class UserController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * 비밀번호 변경
+     * @param userId
+     * @param updatePasswordRequest
+     * @param token
+     * @return
+     */
     @PutMapping("/users/{userId}/password")
     public ResponseEntity<ResultDto> updateUserPassword(@PathVariable("userId") Long userId,
                                                         @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest,

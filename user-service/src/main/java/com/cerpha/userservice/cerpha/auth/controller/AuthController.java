@@ -24,6 +24,11 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * 이메일 인증 코드 발송
+     * @param email
+     * @return
+     */
     @PostMapping("/users/email")
     public ResponseEntity<ResultDto> sendEmail(@RequestParam("email") String email) {
         authService.sendEmail(email);
@@ -31,13 +36,23 @@ public class AuthController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * 이메일 인증 코드 유효성 검사
+     * @param emailRequest
+     * @return
+     */
     @PostMapping("/users/email/verify")
-    public ResponseEntity<ResultDto<VerifyEmailResponse>> verifyEmail(@Valid @RequestBody EmailRequest emailRequest, HttpSession session) {
+    public ResponseEntity<ResultDto<VerifyEmailResponse>> verifyEmail(@Valid @RequestBody EmailRequest emailRequest) {
         VerifyEmailResponse verifyEmailResponse = authService.verifyEmail(emailRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, verifyEmailResponse));
     }
 
+    /**
+     * 회원 가입
+     * @param userRequest
+     * @return
+     */
     @PostMapping("/users/signup")
     public ResponseEntity<ResultDto> signupUser(@Valid @RequestBody SignUpUserRequest userRequest) {
         authService.signup(userRequest);
@@ -45,15 +60,25 @@ public class AuthController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * 토큰 재발급
+     * @param reissueTokenRequest
+     * @return
+     */
     @PostMapping("/users/reissue")
-    public ResponseEntity<ResultDto<TokenResponse>> reissueToken(@RequestBody ReissueTokenRequest reissueTokenRequest) {
+    public ResponseEntity<ResultDto<TokenResponse>> reissueToken(@Valid @RequestBody ReissueTokenRequest reissueTokenRequest) {
         TokenResponse tokenResponse = authService.reissueToken(reissueTokenRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, tokenResponse));
     }
 
+    /**
+     * 로그아웃
+     * @param logoutRequest
+     * @return
+     */
     @PostMapping("/users/logout")
-    public ResponseEntity<ResultDto> logout(@RequestBody LogoutRequest logoutRequest) {
+    public ResponseEntity<ResultDto> logout(@Valid @RequestBody LogoutRequest logoutRequest) {
         authService.logout(logoutRequest);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
