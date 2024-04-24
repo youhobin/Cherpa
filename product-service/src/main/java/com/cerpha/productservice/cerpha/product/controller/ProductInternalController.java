@@ -25,6 +25,11 @@ public class ProductInternalController {
         this.productService = productService;
     }
 
+    /**
+     * 상품 ID 조회
+     * @param productId
+     * @return
+     */
     @GetMapping("/{productId}")
     public ResponseEntity<ResultDto<Long>> getProductId(@PathVariable("productId") Long productId) {
         Long savedProductId = productService.getProductId(productId);
@@ -32,6 +37,11 @@ public class ProductInternalController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, savedProductId));
     }
 
+    /**
+     * Wishlist에 등록된 상품 리스트 조회
+     * @param wishListProductsRequest
+     * @return
+     */
     @PostMapping("/wishlist")
     public ResponseEntity<ResultDto<List<WishlistResponse>>> getProductsInWishList(@RequestBody WishlistProductsRequest wishListProductsRequest) {
         List<WishlistResponse> productsResponse = productService.getProductsInWishList(wishListProductsRequest);
@@ -39,12 +49,22 @@ public class ProductInternalController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productsResponse));
     }
 
+    /**
+     * 주문 시 재고 감소
+     * @param decreaseStockRequest
+     * @return
+     */
     @PostMapping("/order")
     public ResponseEntity<ResultDto<OrderProductListResponse>> decreaseStock(@RequestBody DecreaseStockRequest decreaseStockRequest) {
         OrderProductListResponse orderProductListResponse = productService.decreaseStock(decreaseStockRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, orderProductListResponse));
     }
 
+    /**
+     * 상품 이름 조회
+     * @param getProductsNameRequest
+     * @return
+     */
     @PostMapping("/names")
     public ResponseEntity<ResultDto<ProductNameListResponse>> getProductsName(@RequestBody GetProductsNameRequest getProductsNameRequest) {
         ProductNameListResponse productsName = productService.getProductsName(getProductsNameRequest);
@@ -52,6 +72,11 @@ public class ProductInternalController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productsName));
     }
 
+    /**
+     * 주문 취소 시 재고 복구
+     * @param restoreStockRequest
+     * @return
+     */
     @PostMapping("/cancel")
     public ResponseEntity restoreStock(@RequestBody RestoreStockRequest restoreStockRequest) {
         productService.restoreStock(restoreStockRequest);

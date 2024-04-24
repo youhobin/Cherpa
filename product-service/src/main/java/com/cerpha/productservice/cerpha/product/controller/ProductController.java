@@ -23,6 +23,12 @@ public class ProductController {
         this.productService = productService;
     }
 
+    /**
+     * 상품 전체 조회
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping
     public ResponseEntity<ResultDto<PageResponseDto<ProductListResponse>>> getAllProducts(
             @RequestParam int page,
@@ -32,6 +38,11 @@ public class ProductController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, pagingResponse));
     }
 
+    /**
+     * 단일 상품 상세 조회
+     * @param productId
+     * @return
+     */
     @GetMapping("/{productId}")
     public ResponseEntity<ResultDto> getProductDetail(@PathVariable("productId") Long productId) {
         ProductResponse productDetail = productService.getProductDetail(productId);
