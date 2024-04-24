@@ -10,7 +10,7 @@ import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderProductResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.common.client.product.ProductClient;
-import com.cerpha.orderservice.common.client.product.request.CancelOrderProductRequest;
+import com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.GetProductsNameRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
@@ -138,11 +138,11 @@ public class OrderService {
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
 
-        List<CancelOrderProductRequest> cancelOrderProductRequests = orderProducts.stream()
-                .map(op -> new CancelOrderProductRequest(op.getProductId(), op.getUnitCount()))
+        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                 .toList();
 
-        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(cancelOrderProductRequests);
+        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
         productClient.restoreStock(restoreStockRequest);
 
         Order order = orderRepository.findById(orderId)

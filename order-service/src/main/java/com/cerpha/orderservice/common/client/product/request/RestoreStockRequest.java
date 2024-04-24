@@ -7,9 +7,9 @@ import java.util.List;
 @Getter
 public class RestoreStockRequest {
 
-    List<CancelOrderProductRequest> orderProducts;
+    List<ProductUnitCountRequest> orderProducts;
 
-    public RestoreStockRequest(List<CancelOrderProductRequest> orderProducts) {
+    public RestoreStockRequest(List<ProductUnitCountRequest> orderProducts) {
         this.orderProducts = orderProducts;
     }
 }
