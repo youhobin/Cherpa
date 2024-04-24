@@ -20,6 +20,11 @@ public class RefundController {
         this.refundService = refundService;
     }
 
+    /**
+     * 주문 반품
+     * @param refundRequest
+     * @return
+     */
     @PutMapping("/refund")
     public ResponseEntity<ResultDto> refundOrder(@RequestBody RefundRequest refundRequest) {
         refundService.refundOrder(refundRequest);

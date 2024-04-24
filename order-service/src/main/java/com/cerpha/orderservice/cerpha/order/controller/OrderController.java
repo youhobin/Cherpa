@@ -20,6 +20,11 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    /**
+     * 주문 추가
+     * @param addOrderRequest
+     * @return
+     */
     @PostMapping
     public ResponseEntity<ResultDto> addOrder(@Valid @RequestBody AddOrderRequest addOrderRequest) {
         orderService.addOrder(addOrderRequest);
@@ -27,6 +32,11 @@ public class OrderController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * 주문 리스트 조회
+     * @param orderListRequest
+     * @return
+     */
     @GetMapping
     public ResponseEntity<ResultDto<OrderListResponse>> getOrderList(@Valid @RequestBody OrderListRequest orderListRequest) {
         OrderListResponse orderList = orderService.getOrderList(orderListRequest);
@@ -34,6 +44,11 @@ public class OrderController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, orderList));
     }
 
+    /**
+     * 주문 취소
+     * @param orderId
+     * @return
+     */
     @DeleteMapping("/{orderId}")
     public ResponseEntity<ResultDto> cancelOrder(@PathVariable("orderId") Long orderId) {
         orderService.cancelOrder(orderId);

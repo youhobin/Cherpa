@@ -21,12 +21,22 @@ public class WishlistController {
         this.wishlistService = wishlistService;
     }
 
+    /**
+     * Wishlist에 상품 추가
+     * @param addWishlistRequest
+     * @return
+     */
     @PostMapping
     public ResponseEntity<ResultDto> addWishlist(@Valid @RequestBody AddWishlistRequest addWishlistRequest) {
         wishlistService.addWishlist(addWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * Wishlist 리스트 조회
+     * @param userId
+     * @return
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<ResultDto<AllWishlistResponse>> getWishlists(@PathVariable("userId") Long userId) {
         AllWishlistResponse wishlist = wishlistService.getWishlists(userId);
@@ -34,12 +44,22 @@ public class WishlistController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, wishlist));
     }
 
+    /**
+     * Wishlist 내 상품 수량 변경
+     * @param updateWishlistRequest
+     * @return
+     */
     @PutMapping
     public ResponseEntity<ResultDto> updateWishlistUnitCount(@Valid @RequestBody UpdateWishlistRequest updateWishlistRequest) {
         wishlistService.updateWishlist(updateWishlistRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * Wishlist 내 상품 삭제
+     * @param deleteWishlistRequest
+     * @return
+     */
     @DeleteMapping
     public ResponseEntity<ResultDto> deleteWishlist(@Valid @RequestBody DeleteWishlistRequest deleteWishlistRequest) {
         wishlistService.deleteWishlist(deleteWishlistRequest);
@@ -47,6 +67,11 @@ public class WishlistController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
+    /**
+     * Wishlist 삭제
+     * @param userId
+     * @return
+     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<ResultDto> deleteAllWishList(@PathVariable("userId") Long userId) {
         wishlistService.deleteAllWishList(userId);
