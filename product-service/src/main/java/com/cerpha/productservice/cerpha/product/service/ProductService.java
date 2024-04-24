@@ -2,11 +2,8 @@ package com.cerpha.productservice.cerpha.product.service;
 
 import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
-import com.cerpha.productservice.cerpha.product.request.ProductRequest;
-import com.cerpha.productservice.cerpha.product.request.WishlistProductsRequest;
-import com.cerpha.productservice.cerpha.product.response.ProductListResponse;
-import com.cerpha.productservice.cerpha.product.response.ProductResponse;
-import com.cerpha.productservice.cerpha.product.response.WishlistResponse;
+import com.cerpha.productservice.cerpha.product.request.*;
+import com.cerpha.productservice.cerpha.product.response.*;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.exception.BusinessException;
 import com.cerpha.productservice.common.exception.ExceptionCode;
@@ -84,5 +81,56 @@ public class ProductService {
                             .build();
                 })
                 .toList();
+    }
+
+    @Transactional
+    public OrderProductListResponse decreaseStock(DecreaseStockRequest request) {
+        List<AddOrderProductResponse> orderProductResponses = request.getOrderProducts().stream()
+                .map(op -> {
+                    Product product = productRepository.findById(op.getProductId())
+                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
+
+                    product.decreaseStock(op.getUnitCount());
+
+                    return AddOrderProductResponse.builder()
+                            .productId(product.getId())
+                            .unitCount(op.getUnitCount())
+                            .price(product.getPrice())
+                            .build();
+                })
+                .toList();
+
+        return new OrderProductListResponse(orderProductResponses);
+
+    }
+
+    @Transactional(readOnly = true)
+    public ProductNameListResponse getProductsName(GetProductsNameRequest request) {
+        List<Product> products = productRepository.findByIdIn(request.getProductIds());
+
+        List<ProductNameResponse> productNameResponses = products.stream()
+                .map(p -> new ProductNameResponse(p.getId(), p.getName()))
+                .toList();
+
+        return new ProductNameListResponse(productNameResponses);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getProductId(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
+
+        return product.getId();
+    }
+
+    @Transactional
+    public void restoreStock(RestoreStockRequest request) {
+        request.getOrderProducts()
+                .forEach(op -> {
+                    Product product = productRepository.findById(op.getProductId())
+                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
+
+                    product.restoreStock(op.getUnitCount());
+                });
     }
 }

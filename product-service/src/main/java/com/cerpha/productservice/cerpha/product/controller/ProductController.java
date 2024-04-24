@@ -1,9 +1,9 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
+import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
+import com.cerpha.productservice.cerpha.product.request.GetProductsNameRequest;
 import com.cerpha.productservice.cerpha.product.request.WishlistProductsRequest;
-import com.cerpha.productservice.cerpha.product.response.ProductListResponse;
-import com.cerpha.productservice.cerpha.product.response.ProductResponse;
-import com.cerpha.productservice.cerpha.product.response.WishlistResponse;
+import com.cerpha.productservice.cerpha.product.response.*;
 import com.cerpha.productservice.cerpha.product.service.ProductService;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.dto.ResultDto;
@@ -37,13 +37,6 @@ public class ProductController {
         ProductResponse productDetail = productService.getProductDetail(productId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productDetail));
-    }
-
-    @PostMapping("/wishlist")
-    public ResponseEntity<ResultDto<List<WishlistResponse>>> getProductsInWishList(@RequestBody WishlistProductsRequest wishListProductsRequest) {
-        List<WishlistResponse> productsResponse = productService.getProductsInWishList(wishListProductsRequest);
-
-        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productsResponse));
     }
 
 }
