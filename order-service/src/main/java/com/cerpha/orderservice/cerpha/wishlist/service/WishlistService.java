@@ -26,18 +26,12 @@ import static com.cerpha.orderservice.common.exception.ExceptionCode.*;
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
-//    private final UserRepository userRepository;
-//    private final ProductRepository productRepository;
     private final UserClient userClient;
     private final ProductClient productClient;
 
     public WishlistService(WishlistRepository wishlistRepository,
-//                           UserRepository userRepository,
-//                           ProductRepository productRepository,
                            UserClient userClient, ProductClient productClient) {
         this.wishlistRepository = wishlistRepository;
-//        this.userRepository = userRepository;
-//        this.productRepository = productRepository;
         this.userClient = userClient;
         this.productClient = productClient;
     }
@@ -48,13 +42,8 @@ public class WishlistService {
             throw new BusinessException(DUPLICATED_WISHLIST_PRODUCT);
         }
 
-//        Users user = userRepository.findById(request.getUserId())
-//                .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
-        Long userId = userClient.getUserProfile(request.getUserId()).getResultData().getId();
-
-//        Product product = productRepository.findById(request.getProductId())
-//                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
-        Long productId = productClient.getProductDetail(request.getProductId()).getResultData().getId();
+        Long userId = userClient.getUserId(request.getUserId()).getResultData();
+        Long productId = productClient.getProductId(request.getProductId()).getResultData();
 
         Wishlist wishlist = Wishlist.builder()
                 .userId(userId)

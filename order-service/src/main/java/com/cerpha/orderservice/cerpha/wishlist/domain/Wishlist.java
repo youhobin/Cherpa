@@ -17,13 +17,9 @@ public class Wishlist extends BaseTimeEntity {
     @Column(name = "wishlist_id")
     private Long id;
 
-//    @ManyToOne(fetch = LAZY)
-//    @JoinColumn(name = "user_id")
     @Column(name = "user_id")
     private Long userId;
 
-//    @ManyToOne(fetch = LAZY)
-//    @JoinColumn(name = "product_id")
     @Column(name = "product_id")
     private Long productId;
 
