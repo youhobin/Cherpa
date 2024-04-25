@@ -1,17 +1,13 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
-import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
-import com.cerpha.productservice.cerpha.product.request.GetProductsNameRequest;
-import com.cerpha.productservice.cerpha.product.request.WishlistProductsRequest;
-import com.cerpha.productservice.cerpha.product.response.*;
+import com.cerpha.productservice.cerpha.product.response.ProductListResponse;
+import com.cerpha.productservice.cerpha.product.response.ProductResponse;
 import com.cerpha.productservice.cerpha.product.service.ProductService;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.dto.ResultDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")

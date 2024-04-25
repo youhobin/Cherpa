@@ -4,19 +4,15 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class WishlistResponse {
+public class ProductDetailResponse {
 
-    private Long wishlistId;
     private Long productId;
-    private Long unitCount;
     private String productName;
     private Long productPrice;
 
     @Builder
-    public WishlistResponse(Long wishlistId, Long productId, Long unitCount, String productName, Long productPrice) {
-        this.wishlistId = wishlistId;
+    public ProductDetailResponse(Long productId, String productName, Long productPrice) {
         this.productId = productId;
-        this.unitCount = unitCount;
         this.productName = productName;
         this.productPrice = productPrice;
     }

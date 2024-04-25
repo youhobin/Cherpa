@@ -63,26 +63,6 @@ public class ProductService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public List<WishlistResponse> getProductsInWishList(WishlistProductsRequest request) {
-        List<ProductRequest> productRequests = request.getProducts();
-
-        return productRequests.stream()
-                .map(p -> {
-                    Product product = productRepository.findById(p.getProductId())
-                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
-
-                    return WishlistResponse.builder()
-                            .wishlistId(p.getWishlistId())
-                            .productId(product.getId())
-                            .unitCount(p.getUnitCount())
-                            .productName(product.getName())
-                            .productPrice(product.getPrice())
-                            .build();
-                })
-                .toList();
-    }
-
     @Transactional
     public OrderProductListResponse decreaseStock(DecreaseStockRequest request) {
         List<AddOrderProductResponse> orderProductResponses = request.getOrderProducts().stream()
@@ -106,22 +86,15 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductNameListResponse getProductsName(GetProductsNameRequest request) {
-        List<Product> products = productRepository.findByIdIn(request.getProductIds());
-
-        List<ProductNameResponse> productNameResponses = products.stream()
-                .map(p -> new ProductNameResponse(p.getId(), p.getName()))
-                .toList();
-
-        return new ProductNameListResponse(productNameResponses);
-    }
-
-    @Transactional(readOnly = true)
-    public Long getProductId(Long productId) {
+    public ProductDetailResponse getProductForWishlist(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
 
-        return product.getId();
+        return ProductDetailResponse.builder()
+                .productId(product.getId())
+                .productName(product.getName())
+                .productPrice(product.getPrice())
+                .build();
     }
 
     @Transactional

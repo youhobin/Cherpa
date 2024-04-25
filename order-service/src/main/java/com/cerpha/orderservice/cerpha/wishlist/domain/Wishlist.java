@@ -24,12 +24,16 @@ public class Wishlist extends BaseTimeEntity {
     private Long productId;
 
     private Long unitCount;
+    private String productName;
+    private Long price;
 
     @Builder
-    public Wishlist(Long userId, Long productId, Long unitCount) {
+    public Wishlist(Long userId, Long productId, Long unitCount, String productName, Long price) {
         this.userId = userId;
         this.productId = productId;
         this.unitCount = unitCount;
+        this.productName = productName;
+        this.price = price;
     }
 
     public void changeProductUnitCount(Long changedUnitCount) {

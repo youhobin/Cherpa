@@ -8,8 +8,7 @@ import com.cerpha.orderservice.cerpha.wishlist.request.UpdateWishlistRequest;
 import com.cerpha.orderservice.cerpha.wishlist.response.AllWishlistResponse;
 import com.cerpha.orderservice.cerpha.wishlist.response.WishlistResponse;
 import com.cerpha.orderservice.common.client.product.ProductClient;
-import com.cerpha.orderservice.common.client.product.request.ProductRequest;
-import com.cerpha.orderservice.common.client.product.request.WishlistProductRequest;
+import com.cerpha.orderservice.common.client.product.response.ProductDetailResponse;
 import com.cerpha.orderservice.common.client.user.UserClient;
 import com.cerpha.orderservice.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +42,14 @@ public class WishlistService {
         }
 
         Long userId = userClient.getUserId(request.getUserId()).getResultData();
-        Long productId = productClient.getProductId(request.getProductId()).getResultData();
+        ProductDetailResponse productDetail = productClient.getProductForWishlist(request.getProductId()).getResultData();
 
         Wishlist wishlist = Wishlist.builder()
                 .userId(userId)
-                .productId(productId)
+                .productId(productDetail.getProductId())
                 .unitCount(request.getUnitCount())
+                .productName(productDetail.getProductName())
+                .price(productDetail.getProductPrice() * request.getUnitCount())
                 .build();
 
         wishlistRepository.save(wishlist);
@@ -57,24 +58,23 @@ public class WishlistService {
     @Transactional(readOnly = true)
     public AllWishlistResponse getWishlists(Long userId) {
         List<Wishlist> wishlists = wishlistRepository.findByUserIdOrderByUpdatedAtDesc(userId);
-        List<ProductRequest> productsRequest = wishlists.stream()
-                .map(wishlist -> ProductRequest.builder()
+
+        List<WishlistResponse> wishlistResponses = wishlists.stream()
+                .map(wishlist -> WishlistResponse.builder()
                         .wishlistId(wishlist.getId())
                         .productId(wishlist.getProductId())
                         .unitCount(wishlist.getUnitCount())
+                        .productName(wishlist.getProductName())
+                        .productPrice(wishlist.getPrice())
                         .build())
                 .toList();
 
-        WishlistProductRequest wishlistProductRequest = new WishlistProductRequest(productsRequest);
-
-        List<WishlistResponse> wishlist = productClient.getProductsInWishList(wishlistProductRequest).getResultData();
-
-        long totalPrice = getTotalPrice(wishlist);
+        long totalPrice = getTotalPrice(wishlists);
 
         return AllWishlistResponse.builder()
                 .userId(userId)
                 .totalPrice(totalPrice)
-                .wishlist(wishlist)
+                .wishlist(wishlistResponses)
                 .build();
     }
 
@@ -107,9 +107,9 @@ public class WishlistService {
         wishlistRepository.deleteByUserId(userId);
     }
 
-    private long getTotalPrice(List<WishlistResponse> wishlists) {
+    private long getTotalPrice(List<Wishlist> wishlists) {
         return wishlists.stream()
-                .mapToLong(w -> w.getUnitCount() * w.getProductPrice())
+                .mapToLong(Wishlist::getPrice)
                 .sum();
     }
 
