@@ -61,18 +61,6 @@ public class ProductInternalController {
     }
 
     /**
-     * 상품 이름 조회
-     * @param getProductsNameRequest
-     * @return
-     */
-    @PostMapping("/names")
-    public ResponseEntity<ResultDto<ProductNameListResponse>> getProductsName(@RequestBody GetProductsNameRequest getProductsNameRequest) {
-        ProductNameListResponse productsName = productService.getProductsName(getProductsNameRequest);
-
-        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productsName));
-    }
-
-    /**
      * 주문 취소 시 재고 복구
      * @param restoreStockRequest
      * @return
@@ -82,4 +70,16 @@ public class ProductInternalController {
         productService.restoreStock(restoreStockRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
+
+//    /**
+//     * 상품 이름 조회
+//     * @param getProductsNameRequest
+//     * @return
+//     */
+//    @PostMapping("/names")
+//    public ResponseEntity<ResultDto<ProductNameListResponse>> getProductsName(@RequestBody GetProductsNameRequest getProductsNameRequest) {
+//        ProductNameListResponse productsName = productService.getProductsName(getProductsNameRequest);
+//
+//        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productsName));
+//    }
 }

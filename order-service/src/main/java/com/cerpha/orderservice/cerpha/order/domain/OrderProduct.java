@@ -25,13 +25,15 @@ public class OrderProduct {
 
     private Long unitCount;
     private Long orderProductPrice;
+    private String productName;
 
     @Builder
-    public OrderProduct(Order order, Long productId, Long unitCount, Long orderProductPrice) {
+    public OrderProduct(Order order, Long productId, Long unitCount, Long orderProductPrice, String productName) {
         this.order = order;
         this.productId = productId;
         this.unitCount = unitCount;
         this.orderProductPrice = orderProductPrice;
+        this.productName = productName;
     }
 
 //    public static OrderProduct addOrderProduct(Long productId, Long unitCount) {

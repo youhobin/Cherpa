@@ -28,9 +28,10 @@ public interface ProductClient {
     @PostMapping("/api/internal/products/order")
     ResultDto<OrderProductListResponse> decreaseStock(@RequestBody DecreaseStockRequest decreaseStockRequest);
 
-    @PostMapping("/api/internal/products/names")
-    ResultDto<ProductNameListResponse> getProductsName(@RequestBody GetProductsNameRequest getProductsNameRequest);
-
     @PostMapping("/api/internal/products/cancel")
     ResultDto restoreStock(@RequestBody RestoreStockRequest restoreStockRequest);
+
+//    @PostMapping("/api/internal/products/names")
+
+//    ResultDto<ProductNameListResponse> getProductsName(@RequestBody GetProductsNameRequest getProductsNameRequest);
 }

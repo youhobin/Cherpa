@@ -96,6 +96,7 @@ public class ProductService {
                             .productId(product.getId())
                             .unitCount(op.getUnitCount())
                             .price(product.getPrice())
+                            .productName(product.getName())
                             .build();
                 })
                 .toList();

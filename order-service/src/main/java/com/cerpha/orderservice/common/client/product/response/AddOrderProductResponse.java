@@ -8,5 +8,6 @@ public class AddOrderProductResponse {
     private Long productId;
     private Long unitCount;
     private Long price;
+    private String productName;
 
 }

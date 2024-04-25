@@ -80,6 +80,7 @@ public class OrderService {
                         .productId(op.getProductId())
                         .unitCount(op.getUnitCount())
                         .orderProductPrice(op.getPrice() * op.getUnitCount())
+                        .productName(op.getProductName())
                         .build())
                 .toList();
 
@@ -100,22 +101,10 @@ public class OrderService {
                     Order order = entry.getKey();
                     List<OrderProduct> orderProductList = entry.getValue();
 
-                    List<Long> productIds = orderProductList.stream()
-                            .map(OrderProduct::getProductId)
-                            .distinct()
-                            .toList();
-
-                    List<ProductNameResponse> productNames =
-                            productClient.getProductsName(new GetProductsNameRequest(productIds)).getResultData().getNameResponses();
-
-                    Map<Long, String> productNamesMap = productNames.stream()
-                            .collect(Collectors.toMap(ProductNameResponse::getProductId, ProductNameResponse::getName));
-
-
                     List<OrderProductResponse> orderProductResponses = orderProductList.stream()
                             .map(op -> OrderProductResponse.builder()
                                     .productId(op.getProductId())
-                                    .productName(productNamesMap.get(op.getProductId()))
+                                    .productName(op.getProductName())
                                     .unitCount(op.getUnitCount())
                                     .build())
                             .toList();
