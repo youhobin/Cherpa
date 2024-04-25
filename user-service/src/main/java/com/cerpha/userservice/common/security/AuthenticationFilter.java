@@ -54,8 +54,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new BusinessException(INVALID_CREDENTIALS);
         }
     }
 

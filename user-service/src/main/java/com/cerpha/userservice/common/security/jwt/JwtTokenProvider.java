@@ -17,16 +17,16 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String ACCESS_TOKEN_EXPIRATION = "token.access_token.expiration_time";
-    private final String REFRESH_TOKEN_EXPIRATION = "token.refresh_token.expiration_time";
-    @Value("${token.secret}")
+    private final String ACCESS_TOKEN_EXPIRATION = "env.token.access_token.expiration_time";
+    private final String REFRESH_TOKEN_EXPIRATION = "env.token.refresh_token.expiration_time";
+    @Value("${env.token.secret}")
     private String tokenSecret;
     private final Environment environment;
     private final SecretKey secretKey;
 
     public JwtTokenProvider(Environment environment) {
         this.environment = environment;
-        byte[] secretKeyBytes = Base64.getEncoder().encode(environment.getProperty("token.secret").getBytes());
+        byte[] secretKeyBytes = Base64.getEncoder().encode(environment.getProperty("env.token.secret").getBytes());
         this.secretKey = Keys.hmacShaKeyFor(secretKeyBytes);
     }
 

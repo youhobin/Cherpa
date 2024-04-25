@@ -49,6 +49,12 @@ env:
       감사합니다.
   encryption:
     key: "sherpaprojectforclimbingshopping"
+  token:
+    secret: sherpaprojectforclimbingshoppingmallshop
+    access_token:
+      expiration_time: 86400000
+    refresh_token:
+      expiration_time: 86400000
 
 eureka:
   client:
@@ -62,9 +68,4 @@ logging:
     org.hibernate.sql: debug
     org.hibernate.type: trace
 
-token:
-  secret: sherpaprojectforclimbingshoppingmallshop
-  access_token:
-    expiration_time: 86400000
-  refresh_token:
-    expiration_time: 86400000
+

@@ -2,7 +2,6 @@ package com.cerpha.userservice.common.security;
 
 import com.cerpha.userservice.cerpha.auth.service.AuthService;
 import com.cerpha.userservice.common.redis.RedisService;
-import com.cerpha.userservice.common.security.jwt.JwtAuthenticationFilter;
 import com.cerpha.userservice.common.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,19 +47,11 @@ public class WebSecurity {
 
         http.csrf((csrf) -> csrf.disable());
 
-        http.authorizeHttpRequests((authz) -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/auth/users/signup", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/users/email", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/users/email/verify", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/users/login", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/**", "GET")).permitAll()
-                        .anyRequest().authenticated()
-                )
+        http.authorizeHttpRequests((authz) -> authz.anyRequest().permitAll())
                 .authenticationManager(authenticationManager)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(getAuthenticationFilter(authenticationManager))
-                .addFilterBefore(new JwtAuthenticationFilter(env, authService, redisService), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> {
                     handler.accessDeniedHandler(accessDeniedHandler());
                 });
