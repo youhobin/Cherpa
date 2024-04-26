@@ -11,6 +11,8 @@ import com.cerpha.orderservice.common.client.product.ProductClient;
 import com.cerpha.orderservice.common.client.product.response.ProductDetailResponse;
 import com.cerpha.orderservice.common.client.user.UserClient;
 import com.cerpha.orderservice.common.exception.BusinessException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,8 @@ public class WishlistService {
         this.productClient = productClient;
     }
 
+    @CircuitBreaker(name = "product-service", fallbackMethod = "addWishlistFallback")
+    @Retry(name = "product-service")
     @Transactional
     public void addWishlist(AddWishlistRequest request) {
         if (wishlistRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId()).isPresent()) {
@@ -53,6 +57,11 @@ public class WishlistService {
                 .build();
 
         wishlistRepository.save(wishlist);
+    }
+
+    public void addWishlistFallback(AddWishlistRequest request, Throwable e) {
+        log.error(e.getMessage());
+        throw new BusinessException(NOT_AVAILABLE_ADD_WISHLIST);
     }
 
     @Transactional(readOnly = true)

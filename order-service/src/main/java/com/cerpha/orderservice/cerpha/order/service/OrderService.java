@@ -18,6 +18,8 @@ import com.cerpha.orderservice.common.client.product.response.AddOrderProductRes
 import com.cerpha.orderservice.common.client.user.UserClient;
 import com.cerpha.orderservice.common.exception.BusinessException;
 import com.cerpha.orderservice.common.exception.ExceptionCode;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ import java.util.List;
 
 import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.PAYMENT;
 import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.SHIPPING;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_CANCEL;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_ORDER;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -51,6 +55,8 @@ public class OrderService {
         this.wishlistService = wishlistService;
     }
 
+    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderFallback")
+    @Retry(name = "product-service")
     @Transactional
     public void addOrder(AddOrderRequest request) {
         Long userId = userClient.getUserId(request.getUserId()).getResultData();
@@ -83,6 +89,11 @@ public class OrderService {
         orderProductRepository.saveAll(orderProducts);
 
         wishlistService.deleteAllWishList(userId);
+    }
+
+    public void addOrderFallback(AddOrderRequest request, Throwable e) {
+        log.error(e.getMessage());
+        throw new BusinessException(NOT_AVAILABLE_ORDER);
     }
 
     @Transactional(readOnly = true)
@@ -124,6 +135,8 @@ public class OrderService {
 
     }
 
+    @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
+    @Retry(name = "product-service")
     @Transactional
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
@@ -138,6 +151,11 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
         order.cancel();
+    }
+
+    public void cancelOrderFallback(Long orderId, Throwable e) {
+        log.error(e.getMessage());
+        throw new BusinessException(NOT_AVAILABLE_CANCEL);
     }
 
     @Scheduled(cron = "${env.order.changeStatusCycle}")

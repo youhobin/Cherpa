@@ -27,13 +27,15 @@ public enum ExceptionCode {
 
     // wishlist
     DUPLICATED_WISHLIST_PRODUCT(400, "W001", "이미 WishList에 등록된 상품입니다."),
-    NOT_FOUND_WISHLIST(404, "W002", "WishList에서 해당 상품을 찾을 수 없습니다."),
-    NOT_OWN_WISHLIST(400, "W003", "이 wishlist는 해당 유저가 소유하지 않았습니다."),
+    NOT_FOUND_WISHLIST(404, "W002", "Wishlist에서 해당 상품을 찾을 수 없습니다."),
+    NOT_OWN_WISHLIST(400, "W003", "이 Wishlist는 해당 유저가 소유하지 않았습니다."),
+    NOT_AVAILABLE_ADD_WISHLIST(500, "W004", "현재 Wishlist에 상품을 추가할 수 없습니다."),
 
     // order
     NOT_FOUND_ORDER(404, "O001", "해당 주문을 찾을 수 없습니다."),
     NOT_AVAILABLE_CANCEL(400, "O002", "주문을 취소할 수 없는 상태입니다."),
-    NOT_AVAILABLE_REFUND(400, "003", "반품할 수 없는 주문입니다.");
+    NOT_AVAILABLE_REFUND(400, "O003", "반품할 수 없는 주문입니다."),
+    NOT_AVAILABLE_ORDER(500, "O004", "현재 주문이 불가합니다.");
 
     private final int status;
     private final String code;
