@@ -64,13 +64,11 @@ public class ProductService {
     }
 
     @Transactional
-    public OrderProductListResponse decreaseStock(DecreaseStockRequest request) {
+    public OrderProductListResponse getOrderProductsDetail(OrderProductListRequest request) {
         List<AddOrderProductResponse> orderProductResponses = request.getOrderProducts().stream()
                 .map(op -> {
                     Product product = productRepository.findById(op.getProductId())
                             .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
-
-                    product.decreaseStock(op.getUnitCount());
 
                     return AddOrderProductResponse.builder()
                             .productId(product.getId())
@@ -80,8 +78,21 @@ public class ProductService {
                             .build();
                 })
                 .toList();
-
         return new OrderProductListResponse(orderProductResponses);
+    }
+
+    @Transactional
+    public void decreaseStock(OrderProductListRequest request) {
+        request.getOrderProducts()
+                .forEach(op -> {
+                    Product product = productRepository.findById(op.getProductId())
+                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
+
+                    product.decreaseStock(op.getUnitCount());
+
+
+                });
+
 
     }
 

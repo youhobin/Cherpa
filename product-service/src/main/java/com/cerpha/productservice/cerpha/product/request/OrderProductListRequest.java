@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class DecreaseStockRequest {
+public class OrderProductListRequest {
 
     private List<AddOrderProductRequest> orderProducts;
 }

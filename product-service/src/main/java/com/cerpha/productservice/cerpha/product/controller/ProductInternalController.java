@@ -1,6 +1,6 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
-import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
+import com.cerpha.productservice.cerpha.product.request.OrderProductListRequest;
 import com.cerpha.productservice.cerpha.product.request.RestoreStockRequest;
 import com.cerpha.productservice.cerpha.product.response.OrderProductListResponse;
 import com.cerpha.productservice.cerpha.product.response.ProductDetailResponse;
@@ -26,21 +26,35 @@ public class ProductInternalController {
      * @return
      */
     @GetMapping("/{productId}")
-    public ResponseEntity<ResultDto<ProductDetailResponse>> getProductForWishlist(@PathVariable("productId") Long productId) {
+    public ResponseEntity<ResultDto<ProductDetailResponse>> getProductForWishlist(
+            @PathVariable("productId") Long productId) {
         ProductDetailResponse productDetail = productService.getProductForWishlist(productId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productDetail));
     }
 
     /**
+     * 주문 시 상품 정보 조회
+     * @param orderProductListRequest
+     * @return
+     */
+    @PostMapping
+    public ResponseEntity<ResultDto<OrderProductListResponse>> getOrderProductsDetail(
+            @RequestBody OrderProductListRequest orderProductListRequest) {
+        OrderProductListResponse orderProductListResponse = productService.getOrderProductsDetail(orderProductListRequest);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, orderProductListResponse));
+    }
+
+    /**
      * 주문 시 재고 감소
-     * @param decreaseStockRequest
+     * @param orderProductListRequest
      * @return
      */
     @PostMapping("/order")
-    public ResponseEntity<ResultDto<OrderProductListResponse>> decreaseStock(@RequestBody DecreaseStockRequest decreaseStockRequest) {
-        OrderProductListResponse orderProductListResponse = productService.decreaseStock(decreaseStockRequest);
-        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, orderProductListResponse));
+    public ResponseEntity<ResultDto> decreaseStock(
+            @RequestBody OrderProductListRequest orderProductListRequest) {
+        productService.decreaseStock(orderProductListRequest);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 
     /**

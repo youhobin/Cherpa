@@ -11,7 +11,7 @@ import com.cerpha.orderservice.cerpha.order.response.OrderProductResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
 import com.cerpha.orderservice.common.client.product.ProductClient;
-import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
+import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
 import com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
 import com.cerpha.orderservice.common.client.product.response.AddOrderProductResponse;
@@ -62,7 +62,9 @@ public class OrderService {
         Long userId = userClient.getUserId(request.getUserId()).getResultData();
 
         List<AddOrderProductResponse> orderProductResponses =
-                productClient.decreaseStock(new DecreaseStockRequest(request.getOrderProducts())).getResultData().getProducts();
+                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
+
+        productClient.decreaseStock(new OrderProductListRequest(request.getOrderProducts()));
 
         long totalPrice = getTotalPrice(orderProductResponses);
 
