@@ -11,6 +11,7 @@ public enum ExceptionCode {
     INVALID_CREDENTIALS(401, "C003", "사용자 아이디 또는 비밀번호가 잘못되었습니다."),
     REDIS_CONNECTION_FAIL(500, "C004", "레디스 연결 실패"),
     FORBIDDEN(403, "C005", "권한이 없습니다."),
+    LOCK_NOT_AVAILABLE(409, "C006", "락 획득에 실패했습니다."),
 
     // user
     NOT_FOUND_USER(404, "U001", "사용자를 찾을 수 없습니다."),

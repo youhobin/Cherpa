@@ -8,4 +8,8 @@ import java.util.List;
 public class OrderProductListRequest {
 
     private List<AddOrderProductRequest> orderProducts;
+
+    public OrderProductListRequest(List<AddOrderProductRequest> orderProducts) {
+        this.orderProducts = orderProducts;
+    }
 }

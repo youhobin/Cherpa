@@ -10,4 +10,8 @@ public class AddOrderProductRequest {
     private Long productId;
     private Long unitCount;
 
+    public AddOrderProductRequest(Long productId, Long unitCount) {
+        this.productId = productId;
+        this.unitCount = unitCount;
+    }
 }
