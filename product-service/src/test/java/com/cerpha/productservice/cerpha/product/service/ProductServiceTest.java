@@ -50,10 +50,7 @@ class ProductServiceTest {
         CountDownLatch doneSignal = new CountDownLatch(numThreads);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-        AtomicInteger successCount = new AtomicInteger();
-        AtomicInteger failCount = new AtomicInteger();
-
-        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 10L, "hobin");
+        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 100L, "hobin");
         productRepository.save(product);
 
         List<AddOrderProductRequest> list = new ArrayList<>();
@@ -65,12 +62,7 @@ class ProductServiceTest {
         for (int i = 0; i < numThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    productService.decreaseProductsStock("orders", orderProductListRequest);
-                    successCount.getAndIncrement();
-                    System.out.println("성공");
-                } catch (BusinessException e) {
-                    failCount.getAndIncrement();
-                    System.out.println("실패");
+                    productService.decreaseProductsStock(orderProductListRequest);
                 } finally {
                     doneSignal.countDown();
                 }
@@ -80,13 +72,10 @@ class ProductServiceTest {
         doneSignal.await();
         executorService.shutdown();
 
-//        Assertions.assertThat(successCount.get()).isEqualTo(5);
-//        Assertions.assertThat(failCount.get()).isEqualTo(5);
-
         Product savedProduct =
                 productRepository.findById(1L)
                         .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
-        Assertions.assertThat(savedProduct.getStock()).isEqualTo(0);
+        Assertions.assertThat(savedProduct.getStock()).isEqualTo(80);
     }
 
 }

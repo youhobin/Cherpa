@@ -27,11 +27,11 @@ import static com.cerpha.productservice.common.exception.ExceptionCode.*;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final RedissonClient redissonClient;
+    private final ProductStockService productStockService;
 
-    public ProductService(ProductRepository productRepository, RedissonClient redissonClient) {
+    public ProductService(ProductRepository productRepository, ProductStockService productStockService) {
         this.productRepository = productRepository;
-        this.redissonClient = redissonClient;
+        this.productStockService = productStockService;
     }
 
     @Transactional(readOnly = true)
@@ -89,80 +89,9 @@ public class ProductService {
         return new OrderProductListResponse(orderProductResponses);
     }
 
-//    @Transactional
-//    public void decreaseProductsStock(OrderProductListRequest request) {
-//        String lockKey = "product_1";
-//        RLock lock = redissonClient.getLock(lockKey);
-//        try {
-//            boolean available = lock.tryLock(10L, 5L, TimeUnit.SECONDS);
-//            request.getOrderProducts()
-//                    .forEach(op -> {
-//                        if (!available) {
-//                            log.error("lock 획득 실패");
-//                            throw new BusinessException(LOCK_NOT_AVAILABLE);
-//                        }
-//
-//                        Product product = productRepository.findById(op.getProductId())
-//                                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
-//
-//                        log.info("current_stock={}",product.getStock());
-//                        product.decreaseStock(op.getUnitCount());
-//                    });
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            lock.unlock();
-//        }
-//
-//    }
-
-    /**
-     * 비관적락
-     * @param request
-     */
-    @DistributedLock(key = "#lock")
-    public void decreaseProductsStock(String lock, OrderProductListRequest request) {
-        request.getOrderProducts()
-                .forEach(op -> {
-                    Product product = productRepository.findById(op.getProductId())
-                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
-
-                    log.info("current_stock={}",product.getStock());
-                    product.decreaseStock(op.getUnitCount());
-                });
+    public void decreaseProductsStock(OrderProductListRequest request) {
+        request.getOrderProducts().forEach(productStockService::decreaseStock);
     }
-
-//    @Transactional
-//    public void decreaseProductsStock(OrderProductListRequest request) {
-//        request.getOrderProducts()
-//                .forEach(op -> {
-//                    String lockKey = "product_" + op.getProductId();
-//                    RLock lock = redissonClient.getLock(lockKey);
-//
-//                    try {
-//                        boolean available = lock.tryLock(10L, 5L, TimeUnit.SECONDS);
-//
-//                        if (available) {
-//                            try {
-//                                Product product = productRepository.findById(op.getProductId())
-//                                        .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
-//
-//                                log.info("current_stock={}",product.getStock());
-//                                product.decreaseStock(op.getUnitCount());
-//                            } finally {
-//                                lock.unlock();
-//                            }
-//
-//                        } else {
-//                            log.error("lock 획득 실패");
-//                            throw new BusinessException(LOCK_NOT_AVAILABLE);
-//                        }
-//                    } catch (InterruptedException e) {
-//                        log.error(e.getMessage());
-//                        throw new RuntimeException(e);
-//                    }
-//                });
-//    }
 
     @Transactional(readOnly = true)
     public ProductDetailResponse getProductForWishlist(Long productId) {
