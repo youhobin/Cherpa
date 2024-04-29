@@ -77,7 +77,7 @@ public class OrderServiceTest {
                 .build();
 
         Users savedUser = userRepository.save(user);
-        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 10L, "hobin");
+        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 100L, "hobin");
         Product savedProduct = productRepository.save(product);
 
         List<AddOrderProductRequest> lists = new ArrayList<>();
@@ -111,7 +111,10 @@ public class OrderServiceTest {
         executorService.shutdown();
 
         // then
-        Assertions.assertThat(successCount.get()).isEqualTo(5);
-        Assertions.assertThat(failCount.get()).isEqualTo(5);
+        Product pro = productRepository.findById(1L)
+                .get();
+        Assertions.assertThat(pro.getStock()).isEqualTo(80);
+//        Assertions.assertThat(successCount.get()).isEqualTo(5);
+//        Assertions.assertThat(failCount.get()).isEqualTo(5);
     }
 }

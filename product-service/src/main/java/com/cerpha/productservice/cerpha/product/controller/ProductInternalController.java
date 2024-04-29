@@ -53,7 +53,7 @@ public class ProductInternalController {
     @PostMapping("/order")
     public ResponseEntity<ResultDto> decreaseStock(
             @RequestBody OrderProductListRequest orderProductListRequest) {
-        productService.decreaseProductsStock(orderProductListRequest);
+        productService.decreaseProductsStock("orders",orderProductListRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 

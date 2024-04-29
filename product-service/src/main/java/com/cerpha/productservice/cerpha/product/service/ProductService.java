@@ -6,6 +6,8 @@ import com.cerpha.productservice.cerpha.product.request.*;
 import com.cerpha.productservice.cerpha.product.response.*;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.exception.BusinessException;
+import com.cerpha.productservice.common.exception.ExceptionCode;
+import com.cerpha.productservice.common.redis.DistributedLock;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -87,31 +89,47 @@ public class ProductService {
         return new OrderProductListResponse(orderProductResponses);
     }
 
-    @Transactional
-    public void decreaseProductsStock(OrderProductListRequest request) {
-        String lockKey = "product_1";
-        RLock lock = redissonClient.getLock(lockKey);
-        try {
-            boolean available = lock.tryLock(10L, 5L, TimeUnit.SECONDS);
-            request.getOrderProducts()
-                    .forEach(op -> {
-                        if (!available) {
-                            log.error("lock 획득 실패");
-                            throw new BusinessException(LOCK_NOT_AVAILABLE);
-                        }
+//    @Transactional
+//    public void decreaseProductsStock(OrderProductListRequest request) {
+//        String lockKey = "product_1";
+//        RLock lock = redissonClient.getLock(lockKey);
+//        try {
+//            boolean available = lock.tryLock(10L, 5L, TimeUnit.SECONDS);
+//            request.getOrderProducts()
+//                    .forEach(op -> {
+//                        if (!available) {
+//                            log.error("lock 획득 실패");
+//                            throw new BusinessException(LOCK_NOT_AVAILABLE);
+//                        }
+//
+//                        Product product = productRepository.findById(op.getProductId())
+//                                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
+//
+//                        log.info("current_stock={}",product.getStock());
+//                        product.decreaseStock(op.getUnitCount());
+//                    });
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            lock.unlock();
+//        }
+//
+//    }
 
-                        Product product = productRepository.findById(op.getProductId())
-                                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
+    /**
+     * 비관적락
+     * @param request
+     */
+    @DistributedLock(key = "#lock")
+    public void decreaseProductsStock(String lock, OrderProductListRequest request) {
+        request.getOrderProducts()
+                .forEach(op -> {
+                    Product product = productRepository.findById(op.getProductId())
+                            .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
 
-                        log.info("current_stock={}",product.getStock());
-                        product.decreaseStock(op.getUnitCount());
-                    });
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
-        }
-
+                    log.info("current_stock={}",product.getStock());
+                    product.decreaseStock(op.getUnitCount());
+                });
     }
 
 //    @Transactional
