@@ -25,49 +25,49 @@ spring:
             postLogger: true
       routes:
         - id: order-service
-          uri: http://localhost:8081/
+          uri: lb://order-service
           predicates:
             - Path=/order-service/**
           filters:
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             - AuthorizationHeaderFilter
         - id: product-service
-          uri: http://localhost:8082/
+          uri: lb://product-service
           predicates:
             - Path=/product-service/api/products/**
             - Method=GET
           filters:
             - RewritePath=/product-service/(?<segment>.*), /$\{segment}
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/auth/users/email
             - Method=POST
           filters:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/auth/users/email/verify
             - Method=POST
           filters:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/auth/users/signup
             - Method=POST
           filters:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/auth/users/login
             - Method=POST
           filters:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/auth/users/**
             - Method=POST
@@ -75,7 +75,7 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - AuthorizationHeaderFilter
         - id: user-service
-          uri: http://localhost:8080/
+          uri: lb://user-service
           predicates:
             - Path=/user-service/api/users/**
           filters:
