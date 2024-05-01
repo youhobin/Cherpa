@@ -1,0 +1,24 @@
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10
+    ports:
+      - 13306:3306
+    volumes:
+      - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/mariadb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
