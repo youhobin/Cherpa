@@ -33,7 +33,10 @@ public enum ExceptionCode {
     // order
     NOT_FOUND_ORDER(404, "O001", "해당 주문을 찾을 수 없습니다."),
     NOT_AVAILABLE_CANCEL(400, "O002", "주문을 취소할 수 없는 상태입니다."),
-    NOT_AVAILABLE_REFUND(400, "003", "반품할 수 없는 주문입니다.");
+    NOT_AVAILABLE_REFUND(400, "003", "반품할 수 없는 주문입니다."),
+
+    // payment
+    CHANGE_MIND(400, "PM001", "고객 단순 변심 에러");
 
     private final int status;
     private final String code;

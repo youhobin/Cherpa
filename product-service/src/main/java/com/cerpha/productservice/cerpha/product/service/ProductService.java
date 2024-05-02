@@ -8,6 +8,8 @@ import com.cerpha.productservice.common.client.payment.PaymentClient;
 import com.cerpha.productservice.common.client.payment.request.ProcessPaymentRequest;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.exception.BusinessException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -100,11 +102,20 @@ public class ProductService {
      * 재고 감소 후 결제 진입
      * @param request
      */
+    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")
+    @Retry(name = "order-service")
     public void decreaseProductsStock(DecreaseStockRequest request) {
         request.getOrderProducts().forEach(productStockService::decreaseStock);
 
         // 결제 진입
         paymentClient.processPayment(new ProcessPaymentRequest(request.getUserId(), request.getOrderId()));
+    }
+
+    public void decreaseProductsStockFallback(DecreaseStockRequest request, Throwable e) {
+        log.error(e.getMessage());
+
+        request.getOrderProducts().forEach(productStockService::restoreStock);
+        throw new BusinessException(CHANGE_MIND);
     }
 
     @Transactional(readOnly = true)
@@ -121,12 +132,6 @@ public class ProductService {
 
     @Transactional
     public void restoreStock(RestoreStockRequest request) {
-        request.getOrderProducts()
-                .forEach(op -> {
-                    Product product = productRepository.findById(op.getProductId())
-                            .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
-
-                    product.restoreStock(op.getUnitCount());
-                });
+        request.getOrderProducts().forEach(productStockService::restoreStock);
     }
 }

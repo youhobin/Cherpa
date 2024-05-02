@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.*;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_PAYMENT;
 
 @Getter
 @Entity
@@ -50,11 +51,12 @@ public class Order extends BaseTimeEntity {
     }
 
     public void cancel() {
-        if (!this.status.equals(PAYMENT)) {
-            throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
+        if (this.status.equals(PAYMENT) || this.status.equals(PAYMENT_WAITING)) {
+            this.status = CANCEL;
+            return;
         }
 
-        this.status = CANCEL;
+        throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
     }
 
     public boolean isRefundable(LocalDate now) {
@@ -86,6 +88,9 @@ public class Order extends BaseTimeEntity {
     }
 
     public void completeOrderPayment() {
+        if (!this.status.equals(PAYMENT_WAITING)) {
+            throw new BusinessException(NOT_AVAILABLE_PAYMENT);
+        }
         this.status = PAYMENT;
     }
 }

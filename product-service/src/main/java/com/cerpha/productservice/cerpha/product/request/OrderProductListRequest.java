@@ -9,9 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderProductListRequest {
 
-    private List<AddOrderProductRequest> orderProducts;
+    private List<ProductUnitCountRequest> orderProducts;
 
-    public OrderProductListRequest(List<AddOrderProductRequest> orderProducts) {
+    public OrderProductListRequest(List<ProductUnitCountRequest> orderProducts) {
         this.orderProducts = orderProducts;
     }
 }

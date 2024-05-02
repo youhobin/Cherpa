@@ -26,7 +26,11 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+	// redisson
 	implementation 'org.redisson:redisson-spring-boot-starter:3.29.0'
+
+	// resilience4j
+	implementation 'io.github.resilience4j:resilience4j-spring-boot2'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'

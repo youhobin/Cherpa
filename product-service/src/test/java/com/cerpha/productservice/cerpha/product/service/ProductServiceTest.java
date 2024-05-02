@@ -2,7 +2,7 @@ package com.cerpha.productservice.cerpha.product.service;
 
 import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
-import com.cerpha.productservice.cerpha.product.request.AddOrderProductRequest;
+import com.cerpha.productservice.cerpha.product.request.ProductUnitCountRequest;
 import com.cerpha.productservice.cerpha.product.request.OrderProductListRequest;
 import com.cerpha.productservice.common.exception.BusinessException;
 import com.cerpha.productservice.common.exception.ExceptionCode;
@@ -21,8 +21,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -56,8 +54,8 @@ class ProductServiceTest {
         Product product = new Product(1L, "신발", "신발입니다.", 10000L, 10L, "hobin");
         productRepository.save(product);
 
-        List<AddOrderProductRequest> list = new ArrayList<>();
-        list.add(new AddOrderProductRequest(product.getId(), 2L));
+        List<ProductUnitCountRequest> list = new ArrayList<>();
+        list.add(new ProductUnitCountRequest(product.getId(), 2L));
 
         OrderProductListRequest orderProductListRequest = new OrderProductListRequest(list);
 

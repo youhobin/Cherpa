@@ -99,6 +99,8 @@ public class OrderService {
      * 주문 생성 시 결제 진입
      * @param request
      */
+    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
+    @Retry(name = "product-service")
     @Transactional
     public void addOrderWithPayment(AddOrderRequest request, Long userId) {
         List<AddOrderProductResponse> orderProductResponses =
@@ -132,6 +134,10 @@ public class OrderService {
 
         // 재고 감소
         productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
+    }
+
+    public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, Throwable e) {
+        throw new BusinessException(CHANGE_MIND);
     }
 
     @Transactional(readOnly = true)
@@ -183,12 +189,12 @@ public class OrderService {
                 .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                 .toList();
 
-        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-        productClient.restoreStock(restoreStockRequest);
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
         order.cancel();
+
+        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
+        productClient.restoreStock(restoreStockRequest);
     }
 
     public void cancelOrderFallback(Long orderId, Throwable e) {

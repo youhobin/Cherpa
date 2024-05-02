@@ -9,5 +9,5 @@ public class DecreaseStockRequest {
 
     private Long userId;
     private Long orderId;
-    private List<AddOrderProductRequest> orderProducts;
+    private List<ProductUnitCountRequest> orderProducts;
 }

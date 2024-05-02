@@ -41,11 +41,11 @@ public class PaymentService {
 
     @Transactional
     public void completePayment(CompletePaymentRequest request) {
-        Payment payment = paymentRepository.findByOrderId(request.getOrderId())
+        Payment payment = paymentRepository.findByOrderIdAndPaymentStatus(request.getOrderId(), PaymentStatus.PAYMENT_WAIT)
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_PAYMENT));
 
-        if ("fail".equals(request.getPaymentMethod())) {
-            // todo : 결제 실패로 주문은 취소 상태 및 재고에 다시 반영
+        if ("FAIL".equals(request.getPaymentMethod())) {
+            orderClient.cancelOrder(request.getOrderId());
             throw new BusinessException(ExceptionCode.PAYMENT_FAIl);
         }
 

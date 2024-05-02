@@ -1,5 +1,6 @@
 package com.cerpha.paymentservice.common.exception;
 
+import com.cerpha.paymentservice.common.client.exception.FeignClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,6 +23,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getExceptionCode().getStatus()).body(new ExceptionResponse(e.getExceptionCode()));
     }
 
+    @ExceptionHandler(FeignClientException.class)
+    public ResponseEntity<ExceptionResponse> feignClientExceptionHandler(FeignClientException e) {
+        log.error("FeignClientExceptionHandler", e);
+
+        return ResponseEntity.status(e.getExceptionResponse().getStatus()).body(e.getExceptionResponse());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException", e);
@@ -39,7 +47,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> exceptionHandler(Exception e) {
         log.error("ERROR", e);
-        return ResponseEntity.status(400)
+
+        return ResponseEntity.status(500)
                 .body(e);
     }
 }
