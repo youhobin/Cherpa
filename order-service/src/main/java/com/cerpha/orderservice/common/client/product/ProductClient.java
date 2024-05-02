@@ -1,6 +1,7 @@
 package com.cerpha.orderservice.common.client.product;
 
 import com.cerpha.orderservice.cerpha.order.request.AddOrderProductRequest;
+import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
 import com.cerpha.orderservice.common.client.product.response.OrderProductListResponse;
@@ -23,8 +24,11 @@ public interface ProductClient {
     @PostMapping("/api/internal/products")
     ResultDto<OrderProductListResponse> getOrderProductsDetail(@RequestBody OrderProductListRequest orderProductListRequest);
 
+//    @PostMapping("/api/internal/products/order")
+//    ResultDto decreaseStock(@RequestBody OrderProductListRequest orderProductListRequest);
+
     @PostMapping("/api/internal/products/order")
-    ResultDto decreaseStock(@RequestBody OrderProductListRequest orderProductListRequest);
+    ResultDto decreaseStock(@RequestBody DecreaseStockRequest decreaseStockRequest);
 
     @PostMapping("/api/internal/products/cancel")
     ResultDto restoreStock(@RequestBody RestoreStockRequest restoreStockRequest);

@@ -11,6 +11,7 @@ import com.cerpha.orderservice.cerpha.order.response.OrderProductResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
 import com.cerpha.orderservice.common.client.product.ProductClient;
+import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
 import com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
@@ -31,10 +32,8 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.PAYMENT;
-import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.SHIPPING;
-import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_CANCEL;
-import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_ORDER;
+import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.*;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.*;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -58,13 +57,11 @@ public class OrderService {
     @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderFallback")
     @Retry(name = "product-service")
     @Transactional
-    public void addOrder(AddOrderRequest request) {
-        Long userId = userClient.getUserId(request.getUserId()).getResultData();
-
+    public void addOrder(AddOrderRequest request, Long userId) {
         List<AddOrderProductResponse> orderProductResponses =
                 productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
 
-        productClient.decreaseStock(new OrderProductListRequest(request.getOrderProducts()));
+//        productClient.decreaseStock(new OrderProductListRequest(request.getOrderProducts()));
 
         long totalPrice = getTotalPrice(orderProductResponses);
 
@@ -96,6 +93,45 @@ public class OrderService {
     public void addOrderFallback(AddOrderRequest request, Throwable e) {
         log.error(e.getMessage());
         throw new BusinessException(NOT_AVAILABLE_ORDER);
+    }
+
+    /**
+     * 주문 생성 시 결제 진입
+     * @param request
+     */
+    @Transactional
+    public void addOrderWithPayment(AddOrderRequest request, Long userId) {
+        List<AddOrderProductResponse> orderProductResponses =
+                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
+
+        long totalPrice = getTotalPrice(orderProductResponses);
+
+        Order order = Order.builder()
+                .deliveryAddress(request.getDeliveryAddress())
+                .deliveryPhone(request.getDeliveryPhone())
+                .status(PAYMENT_WAITING)
+                .userId(userId)
+                .totalPrice(totalPrice)
+                .build();
+
+        Order savedOrder = orderRepository.save(order);
+
+        List<OrderProduct> orderProducts = orderProductResponses.stream()
+                .map(op -> OrderProduct.builder()
+                        .order(order)
+                        .productId(op.getProductId())
+                        .unitCount(op.getUnitCount())
+                        .orderProductPrice(op.getPrice() * op.getUnitCount())
+                        .productName(op.getProductName())
+                        .build())
+                .toList();
+
+        orderProductRepository.saveAll(orderProducts);
+
+        wishlistService.deleteAllWishList(userId);
+
+        // 재고 감소
+        productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
     }
 
     @Transactional(readOnly = true)
@@ -160,6 +196,14 @@ public class OrderService {
         throw new BusinessException(NOT_AVAILABLE_CANCEL);
     }
 
+    @Transactional
+    public void completeOrderPayment(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(NOT_FOUND_ORDER));
+
+        order.completeOrderPayment();
+    }
+
     @Scheduled(cron = "${env.order.changeStatusCycle}")
     @Transactional
     public void updateOrderStatus() {
@@ -191,5 +235,4 @@ public class OrderService {
                 .mapToLong(op -> op.getPrice() * op.getUnitCount())
                 .sum();
     }
-
 }

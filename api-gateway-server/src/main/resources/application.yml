@@ -38,6 +38,13 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/product-service/(?<segment>.*), /$\{segment}
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment-service/**
+          filters:
+            - RewritePath=/payment-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
         - id: user-service
           uri: lb://user-service
           predicates:
