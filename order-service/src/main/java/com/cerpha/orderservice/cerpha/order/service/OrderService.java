@@ -54,44 +54,6 @@ public class OrderService {
         this.wishlistService = wishlistService;
     }
 
-    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderFallback")
-    @Retry(name = "product-service")
-    @Transactional
-    public void addOrder(AddOrderRequest request, Long userId) {
-        List<OrderProductDetailResponse> orderProductResponses =
-                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
-
-//        productClient.decreaseStock(new OrderProductListRequest(request.getOrderProducts()));
-
-        long totalPrice = getTotalPrice(orderProductResponses);
-
-        Order order = Order.builder()
-                .deliveryAddress(request.getDeliveryAddress())
-                .deliveryPhone(request.getDeliveryPhone())
-                .status(PAYMENT)
-                .userId(userId)
-                .build();
-
-        orderRepository.save(order);
-
-        List<OrderProduct> orderProducts = orderProductResponses.stream()
-                .map(op -> OrderProduct.builder()
-                        .order(order)
-                        .productId(op.getProductId())
-                        .unitCount(op.getUnitCount())
-                        .build())
-                .toList();
-
-        orderProductRepository.saveAll(orderProducts);
-
-        wishlistService.deleteAllWishList(userId);
-    }
-
-    public void addOrderFallback(AddOrderRequest request, Throwable e) {
-        log.error(e.getMessage());
-        throw new BusinessException(NOT_AVAILABLE_ORDER);
-    }
-
     /**
      * 주문 생성 시 결제 진입
      * @param request
@@ -124,41 +86,6 @@ public class OrderService {
         // 재고 감소
         productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
     }
-
-//    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
-//    @Retry(name = "product-service")
-//    @Transactional
-//    public void addOrderWithPayment(AddOrderRequest request, Long userId) {
-//        List<OrderProductDetailResponse> orderProductResponses =
-//                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
-//
-//        long totalPrice = getTotalPrice(orderProductResponses);
-//
-//        Order order = Order.builder()
-//                .deliveryAddress(request.getDeliveryAddress())
-//                .deliveryPhone(request.getDeliveryPhone())
-//                .status(PAYMENT_WAITING)
-//                .userId(userId)
-//                .totalPrice(totalPrice)
-//                .build();
-//
-//        Order savedOrder = orderRepository.save(order);
-//
-//        List<OrderProduct> orderProducts = orderProductResponses.stream()
-//                .map(op -> OrderProduct.builder()
-//                        .order(order)
-//                        .productId(op.getProductId())
-//                        .unitCount(op.getUnitCount())
-//                        .build())
-//                .toList();
-//
-//        orderProductRepository.saveAll(orderProducts);
-//
-//        wishlistService.deleteAllWishList(userId);
-//
-//        // 재고 감소
-//        productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
-//    }
 
     public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
         log.error(e.getMessage());
@@ -204,45 +131,6 @@ public class OrderService {
         return new OrderListResponse(sortedResponses);
 
     }
-
-//    @Transactional(readOnly = true)
-//    public OrderListResponse getOrderList(OrderListRequest request) {
-//        List<OrderProduct> orderProducts =
-//                orderProductRepository.findOrderProductsByUserId(request.getUserId());
-//
-//        List<OrderResponse> orderResponses = orderProducts.stream()
-//                .collect(groupingBy(OrderProduct::getOrder))
-//                .entrySet().stream()
-//                .map(entry -> {
-//                    Order order = entry.getKey();
-//                    List<OrderProduct> orderProductList = entry.getValue();
-//
-//                    List<OrderProductResponse> orderProductResponses = orderProductList.stream()
-//                            .map(op -> OrderProductResponse.builder()
-//                                    .productId(op.getProductId())
-//                                    .productName(op.getProductName())
-//                                    .unitCount(op.getUnitCount())
-//                                    .build())
-//                            .toList();
-//
-//                    return OrderResponse.builder()
-//                            .userId(order.getUserId())
-//                            .orderId(order.getId())
-//                            .deliveryAddress(order.getDeliveryAddress())
-//                            .deliveryPhone(order.getDeliveryPhone())
-//                            .totalPrice(order.getTotalPrice())
-//                            .status(order.getStatus().toString())
-//                            .orderProducts(orderProductResponses)
-//                            .updatedAt(order.getUpdatedAt())
-//                            .build();
-//                })
-//                .toList();
-//
-//        List<OrderResponse> sortedResponses = sortOrderResponse(orderResponses);
-//
-//        return new OrderListResponse(sortedResponses);
-//
-//    }
 
     @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
     @Retry(name = "product-service")

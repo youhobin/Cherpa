@@ -22,20 +22,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-//    /**
-//     * 주문 추가
-//     * @param addOrderRequest
-//     * @return
-//     */
-//    @PostMapping
-//    public ResponseEntity<ResultDto> addOrder(
-//            @Valid @RequestBody AddOrderRequest addOrderRequest,
-//            @RequestHeader("userId") Long userId) {
-//        orderService.addOrder(addOrderRequest, userId);
-//
-//        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
-//    }
-
     /**
      * 주문 추가 시 결제 진입
      * @param addOrderRequest
