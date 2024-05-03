@@ -27,8 +27,9 @@ public class WishlistController {
      * @return
      */
     @PostMapping
-    public ResponseEntity<ResultDto> addWishlist(@Valid @RequestBody AddWishlistRequest addWishlistRequest) {
-        wishlistService.addWishlist(addWishlistRequest);
+    public ResponseEntity<ResultDto> addWishlist(@Valid @RequestBody AddWishlistRequest addWishlistRequest,
+                                                 @RequestHeader("userId") Long userId) {
+        wishlistService.addWishlist(addWishlistRequest, userId);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 

@@ -21,9 +21,6 @@ public interface ProductClient {
     @PostMapping("/api/internal/products")
     ResultDto<OrderProductListResponse> getOrderProductsDetail(@RequestBody OrderProductListRequest orderProductListRequest);
 
-//    @PostMapping("/api/internal/products/order")
-//    ResultDto decreaseStock(@RequestBody OrderProductListRequest orderProductListRequest);
-
     @PostMapping("/api/internal/products/order")
     ResultDto decreaseStock(@RequestBody DecreaseStockRequest decreaseStockRequest);
 

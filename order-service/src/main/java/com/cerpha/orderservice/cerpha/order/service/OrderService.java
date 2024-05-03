@@ -8,7 +8,6 @@ import com.cerpha.orderservice.cerpha.order.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.cerpha.order.request.AddOrderRequest;
 import com.cerpha.orderservice.cerpha.order.request.OrderListRequest;
 import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
-import com.cerpha.orderservice.cerpha.order.response.OrderProductResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
 import com.cerpha.orderservice.common.client.product.ProductClient;
@@ -88,7 +87,6 @@ public class OrderService {
     }
 
     public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
-        log.error(e.getMessage());
         throw new BusinessException(e.getExceptionCode());
     }
 
@@ -138,8 +136,8 @@ public class OrderService {
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
 
-        List<com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
-                .map(op -> new com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                 .toList();
 
         Order order = orderRepository.findById(orderId)
@@ -150,8 +148,7 @@ public class OrderService {
         productClient.restoreStock(restoreStockRequest);
     }
 
-    public void cancelOrderFallback(Long orderId, Throwable e) {
-        log.error(e.getMessage());
+    public void cancelOrderFallback(Long orderId, BusinessException e) {
         throw new BusinessException(NOT_AVAILABLE_CANCEL);
     }
 

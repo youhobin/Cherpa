@@ -113,8 +113,6 @@ public class ProductService {
     }
 
     public void decreaseProductsStockFallback(DecreaseStockRequest request, BusinessException e) {
-        log.error(e.getMessage());
-
         throw new BusinessException(e.getExceptionCode());
     }
 
