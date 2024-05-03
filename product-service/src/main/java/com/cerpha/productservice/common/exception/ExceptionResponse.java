@@ -1,10 +1,12 @@
 package com.cerpha.productservice.common.exception;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
 public class ExceptionResponse {
 
     private int status;

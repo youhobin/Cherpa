@@ -4,6 +4,7 @@ import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
 import com.cerpha.productservice.cerpha.product.request.*;
 import com.cerpha.productservice.cerpha.product.response.*;
+import com.cerpha.productservice.common.client.exception.FeignClientException;
 import com.cerpha.productservice.common.client.payment.PaymentClient;
 import com.cerpha.productservice.common.client.payment.request.ProcessPaymentRequest;
 import com.cerpha.productservice.common.dto.PageResponseDto;
@@ -111,11 +112,10 @@ public class ProductService {
         paymentClient.processPayment(new ProcessPaymentRequest(request.getUserId(), request.getOrderId()));
     }
 
-    public void decreaseProductsStockFallback(DecreaseStockRequest request, Throwable e) {
+    public void decreaseProductsStockFallback(DecreaseStockRequest request, BusinessException e) {
         log.error(e.getMessage());
 
-        request.getOrderProducts().forEach(productStockService::restoreStock);
-        throw new BusinessException(CHANGE_MIND);
+        throw new BusinessException(e.getExceptionCode());
     }
 
     @Transactional(readOnly = true)
@@ -133,5 +133,13 @@ public class ProductService {
     @Transactional
     public void restoreStock(RestoreStockRequest request) {
         request.getOrderProducts().forEach(productStockService::restoreStock);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductStockResponse getProductStock(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
+
+        return new ProductStockResponse(product.getId(), product.getStock());
     }
 }

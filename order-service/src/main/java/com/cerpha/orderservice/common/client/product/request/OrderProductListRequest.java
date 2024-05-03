@@ -1,6 +1,6 @@
 package com.cerpha.orderservice.common.client.product.request;
 
-import com.cerpha.orderservice.cerpha.order.request.AddOrderProductRequest;
+import com.cerpha.orderservice.cerpha.order.request.ProductUnitCountRequest;
 import lombok.Getter;
 
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
 @Getter
 public class OrderProductListRequest {
 
-    private List<AddOrderProductRequest> orderProducts;
+    private List<ProductUnitCountRequest> orderProducts;
 
-    public OrderProductListRequest(List<AddOrderProductRequest> orderProducts) {
+    public OrderProductListRequest(List<ProductUnitCountRequest> orderProducts) {
         this.orderProducts = orderProducts;
     }
 }

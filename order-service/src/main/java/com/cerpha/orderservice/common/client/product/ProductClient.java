@@ -1,6 +1,5 @@
 package com.cerpha.orderservice.common.client.product;
 
-import com.cerpha.orderservice.cerpha.order.request.AddOrderProductRequest;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
 
 @FeignClient(name = "product-service")
 public interface ProductClient {

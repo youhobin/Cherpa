@@ -1,6 +1,6 @@
-package com.cerpha.paymentservice.common.client.exception;
+package com.cerpha.orderservice.common.client.exception;
 
-import com.cerpha.paymentservice.common.exception.ExceptionResponse;
+import com.cerpha.orderservice.common.exception.ExceptionResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;

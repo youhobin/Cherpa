@@ -4,6 +4,7 @@ import com.cerpha.orderservice.cerpha.order.domain.Order;
 import com.cerpha.orderservice.cerpha.order.domain.OrderProduct;
 import com.cerpha.orderservice.cerpha.order.repository.OrderProductRepository;
 import com.cerpha.orderservice.cerpha.order.repository.OrderRepository;
+import com.cerpha.orderservice.cerpha.order.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.cerpha.order.request.AddOrderRequest;
 import com.cerpha.orderservice.cerpha.order.request.OrderListRequest;
 import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
@@ -13,9 +14,8 @@ import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
 import com.cerpha.orderservice.common.client.product.ProductClient;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
-import com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
-import com.cerpha.orderservice.common.client.product.response.AddOrderProductResponse;
+import com.cerpha.orderservice.common.client.product.response.OrderProductDetailResponse;
 import com.cerpha.orderservice.common.client.user.UserClient;
 import com.cerpha.orderservice.common.exception.BusinessException;
 import com.cerpha.orderservice.common.exception.ExceptionCode;
@@ -58,7 +58,7 @@ public class OrderService {
     @Retry(name = "product-service")
     @Transactional
     public void addOrder(AddOrderRequest request, Long userId) {
-        List<AddOrderProductResponse> orderProductResponses =
+        List<OrderProductDetailResponse> orderProductResponses =
                 productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
 
 //        productClient.decreaseStock(new OrderProductListRequest(request.getOrderProducts()));
@@ -70,7 +70,6 @@ public class OrderService {
                 .deliveryPhone(request.getDeliveryPhone())
                 .status(PAYMENT)
                 .userId(userId)
-                .totalPrice(totalPrice)
                 .build();
 
         orderRepository.save(order);
@@ -80,8 +79,6 @@ public class OrderService {
                         .order(order)
                         .productId(op.getProductId())
                         .unitCount(op.getUnitCount())
-                        .orderProductPrice(op.getPrice() * op.getUnitCount())
-                        .productName(op.getProductName())
                         .build())
                 .toList();
 
@@ -103,28 +100,20 @@ public class OrderService {
     @Retry(name = "product-service")
     @Transactional
     public void addOrderWithPayment(AddOrderRequest request, Long userId) {
-        List<AddOrderProductResponse> orderProductResponses =
-                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
-
-        long totalPrice = getTotalPrice(orderProductResponses);
-
         Order order = Order.builder()
                 .deliveryAddress(request.getDeliveryAddress())
                 .deliveryPhone(request.getDeliveryPhone())
                 .status(PAYMENT_WAITING)
                 .userId(userId)
-                .totalPrice(totalPrice)
                 .build();
 
         Order savedOrder = orderRepository.save(order);
 
-        List<OrderProduct> orderProducts = orderProductResponses.stream()
+        List<OrderProduct> orderProducts = request.getOrderProducts().stream()
                 .map(op -> OrderProduct.builder()
                         .order(order)
                         .productId(op.getProductId())
-                        .unitCount(op.getUnitCount())
-                        .orderProductPrice(op.getPrice() * op.getUnitCount())
-                        .productName(op.getProductName())
+                        .unitCount(op.getProductId())
                         .build())
                 .toList();
 
@@ -136,8 +125,44 @@ public class OrderService {
         productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
     }
 
-    public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, Throwable e) {
-        throw new BusinessException(CHANGE_MIND);
+//    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
+//    @Retry(name = "product-service")
+//    @Transactional
+//    public void addOrderWithPayment(AddOrderRequest request, Long userId) {
+//        List<OrderProductDetailResponse> orderProductResponses =
+//                productClient.getOrderProductsDetail(new OrderProductListRequest(request.getOrderProducts())).getResultData().getProducts();
+//
+//        long totalPrice = getTotalPrice(orderProductResponses);
+//
+//        Order order = Order.builder()
+//                .deliveryAddress(request.getDeliveryAddress())
+//                .deliveryPhone(request.getDeliveryPhone())
+//                .status(PAYMENT_WAITING)
+//                .userId(userId)
+//                .totalPrice(totalPrice)
+//                .build();
+//
+//        Order savedOrder = orderRepository.save(order);
+//
+//        List<OrderProduct> orderProducts = orderProductResponses.stream()
+//                .map(op -> OrderProduct.builder()
+//                        .order(order)
+//                        .productId(op.getProductId())
+//                        .unitCount(op.getUnitCount())
+//                        .build())
+//                .toList();
+//
+//        orderProductRepository.saveAll(orderProducts);
+//
+//        wishlistService.deleteAllWishList(userId);
+//
+//        // 재고 감소
+//        productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
+//    }
+
+    public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
+        log.error(e.getMessage());
+        throw new BusinessException(e.getExceptionCode());
     }
 
     @Transactional(readOnly = true)
@@ -152,20 +177,21 @@ public class OrderService {
                     Order order = entry.getKey();
                     List<OrderProduct> orderProductList = entry.getValue();
 
-                    List<OrderProductResponse> orderProductResponses = orderProductList.stream()
-                            .map(op -> OrderProductResponse.builder()
-                                    .productId(op.getProductId())
-                                    .productName(op.getProductName())
-                                    .unitCount(op.getUnitCount())
-                                    .build())
+                    List<ProductUnitCountRequest> productUnitCountRequests = orderProductList.stream()
+                            .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                             .toList();
+
+                    List<OrderProductDetailResponse> orderProductResponses =
+                            productClient.getOrderProductsDetail(new OrderProductListRequest(productUnitCountRequests)).getResultData().getProducts();
+
+                    long totalPrice = getTotalPrice(orderProductResponses);
 
                     return OrderResponse.builder()
                             .userId(order.getUserId())
                             .orderId(order.getId())
                             .deliveryAddress(order.getDeliveryAddress())
                             .deliveryPhone(order.getDeliveryPhone())
-                            .totalPrice(order.getTotalPrice())
+                            .totalPrice(totalPrice)
                             .status(order.getStatus().toString())
                             .orderProducts(orderProductResponses)
                             .updatedAt(order.getUpdatedAt())
@@ -179,14 +205,53 @@ public class OrderService {
 
     }
 
+//    @Transactional(readOnly = true)
+//    public OrderListResponse getOrderList(OrderListRequest request) {
+//        List<OrderProduct> orderProducts =
+//                orderProductRepository.findOrderProductsByUserId(request.getUserId());
+//
+//        List<OrderResponse> orderResponses = orderProducts.stream()
+//                .collect(groupingBy(OrderProduct::getOrder))
+//                .entrySet().stream()
+//                .map(entry -> {
+//                    Order order = entry.getKey();
+//                    List<OrderProduct> orderProductList = entry.getValue();
+//
+//                    List<OrderProductResponse> orderProductResponses = orderProductList.stream()
+//                            .map(op -> OrderProductResponse.builder()
+//                                    .productId(op.getProductId())
+//                                    .productName(op.getProductName())
+//                                    .unitCount(op.getUnitCount())
+//                                    .build())
+//                            .toList();
+//
+//                    return OrderResponse.builder()
+//                            .userId(order.getUserId())
+//                            .orderId(order.getId())
+//                            .deliveryAddress(order.getDeliveryAddress())
+//                            .deliveryPhone(order.getDeliveryPhone())
+//                            .totalPrice(order.getTotalPrice())
+//                            .status(order.getStatus().toString())
+//                            .orderProducts(orderProductResponses)
+//                            .updatedAt(order.getUpdatedAt())
+//                            .build();
+//                })
+//                .toList();
+//
+//        List<OrderResponse> sortedResponses = sortOrderResponse(orderResponses);
+//
+//        return new OrderListResponse(sortedResponses);
+//
+//    }
+
     @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
     @Retry(name = "product-service")
     @Transactional
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
 
-        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
-                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+        List<com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                .map(op -> new com.cerpha.orderservice.common.client.product.request.ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                 .toList();
 
         Order order = orderRepository.findById(orderId)
@@ -236,7 +301,7 @@ public class OrderService {
                 .toList();
     }
 
-    private static long getTotalPrice(List<AddOrderProductResponse> orderProductResponses) {
+    private static long getTotalPrice(List<OrderProductDetailResponse> orderProductResponses) {
         return orderProductResponses.stream()
                 .mapToLong(op -> op.getPrice() * op.getUnitCount())
                 .sum();

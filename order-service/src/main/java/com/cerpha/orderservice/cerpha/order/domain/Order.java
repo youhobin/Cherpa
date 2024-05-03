@@ -33,8 +33,6 @@ public class Order extends BaseTimeEntity {
     @Convert(converter = EncryptionConverter.class)
     private String deliveryPhone;
 
-    private Long totalPrice;
-
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -42,10 +40,9 @@ public class Order extends BaseTimeEntity {
     private Long userId;
 
     @Builder
-    public Order(String deliveryAddress, String deliveryPhone, Long totalPrice, OrderStatus status, Long userId) {
+    public Order(String deliveryAddress, String deliveryPhone, OrderStatus status, Long userId) {
         this.deliveryAddress = deliveryAddress;
         this.deliveryPhone = deliveryPhone;
-        this.totalPrice = totalPrice;
         this.status = status;
         this.userId = userId;
     }
