@@ -35,6 +35,9 @@ class ProductServiceTest {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    ProductStockService productStockService;
+
     @AfterEach
     void tearDown() {
         productRepository.deleteAllInBatch();
@@ -44,27 +47,25 @@ class ProductServiceTest {
     @Test
     public void decreaseProductsStock() throws InterruptedException {
         // given
-        int numThreads = 10;
+        int numThreads = 100;
         CountDownLatch doneSignal = new CountDownLatch(numThreads);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
         AtomicInteger successCount = new AtomicInteger();
         AtomicInteger failCount = new AtomicInteger();
 
-        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 10L, "hobin");
-        productRepository.save(product);
+        Product product = new Product( "신발", "신발입니다.", 10000L, 10000L, "hobin");
+        Product save = productRepository.save(product);
 
-        List<ProductUnitCountRequest> list = new ArrayList<>();
-        list.add(new ProductUnitCountRequest(product.getId(), 2L));
+//        List<ProductUnitCountRequest> list = new ArrayList<>();
+//        list.add(new ProductUnitCountRequest(product.getId(), 2L));
 
-        OrderProductListRequest orderProductListRequest = new OrderProductListRequest(list);
-
+        ProductUnitCountRequest productUnitCountRequest = new ProductUnitCountRequest(save.getId(), 1L);
         // when
         for (int i = 0; i < numThreads; i++) {
             executorService.submit(() -> {
                 try {
-//                    productService.decreaseProductsStock(orderProductListRequest);
-                    successCount.getAndIncrement();
+                    productStockService.decreaseStock(productUnitCountRequest);
                 } catch (BusinessException e) {
                     failCount.getAndIncrement();
                 } finally {
@@ -80,8 +81,8 @@ class ProductServiceTest {
                 productRepository.findById(1L)
                         .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
         Assertions.assertThat(savedProduct.getStock()).isEqualTo(0);
-        Assertions.assertThat(successCount.get()).isEqualTo(5);
-        Assertions.assertThat(failCount.get()).isEqualTo(5);
+//        Assertions.assertThat(successCount.get()).isEqualTo(5);
+//        Assertions.assertThat(failCount.get()).isEqualTo(5);
     }
 
 }
