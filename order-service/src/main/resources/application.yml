@@ -17,12 +17,14 @@ spring:
         format_sql: true
         default_batch_fetch_size: 1000
         show_sql: true
+  kafka:
+    bootstrap-servers: 127.0.0.1:29092
 
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        failure-rate-threshold: 10   # 실패 4% 이상 시 서킷 오픈
+        failure-rate-threshold: 50   # 실패 4% 이상 시 서킷 오픈
         slow-call-duration-threshold: 3000   # 500ms 이상 소요 시 실패로 간주
         slow-call-rate-threshold: 10   # slowCallDurationThreshold 초과 비율이 10% 이상 시 서킷 오픈
         wait-duration-in-open-state: 6000   # OPEN -> HALF-OPEN 전환 전 기다리는 시간
@@ -52,6 +54,12 @@ env:
     key: "sherpaprojectforclimbingshopping"
   order:
     changeStatusCycle: 0 0 0 * * ?
+  kafka:
+    producer:
+      topic:
+        stock-decrease: "stock-decrease-topic"
+        process-payment: "process-payment-topic"
+
 
 eureka:
   client:

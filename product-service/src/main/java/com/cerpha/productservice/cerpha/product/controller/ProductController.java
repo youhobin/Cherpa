@@ -47,6 +47,11 @@ public class ProductController {
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productDetail));
     }
 
+    /**
+     * 재고 조회
+     * @param productId
+     * @return
+     */
     @GetMapping("/{productId}/stock")
     public ResponseEntity<ResultDto<ProductStockResponse>> getProductStock(@PathVariable("productId") Long productId) {
         ProductStockResponse productStock = productService.getProductStock(productId);

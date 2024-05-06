@@ -92,25 +92,22 @@ public class ProductService {
     }
 
     /**
-     * 기존 재고 감소
+     * 재고 감소
      * @param request
      */
-//    public void decreaseProductsStock(OrderProductListRequest request) {
-//        request.getOrderProducts().forEach(productStockService::decreaseStock);
-//    }
-
-    /**
-     * 재고 감소 후 결제 진입
-     * @param request
-     */
-    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")
-    @Retry(name = "order-service")
     public void decreaseProductsStock(DecreaseStockRequest request) {
         request.getOrderProducts().forEach(productStockService::decreaseStock);
 
-        // 결제 진입
-        paymentClient.processPayment(new ProcessPaymentRequest(request.getUserId(), request.getOrderId()));
     }
+
+//    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")
+//    @Retry(name = "order-service")
+//    public void decreaseProductsStock(DecreaseStockRequest request) {
+//        request.getOrderProducts().forEach(productStockService::decreaseStock);
+//
+//        // 결제 진입
+//        paymentClient.processPayment(new ProcessPaymentRequest(request.getUserId(), request.getOrderId(), request.getOrderProducts()));
+//    }
 
     public void decreaseProductsStockFallback(DecreaseStockRequest request, BusinessException e) {
         throw new BusinessException(e.getExceptionCode());

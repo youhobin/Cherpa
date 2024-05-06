@@ -6,6 +6,8 @@ import com.cerpha.paymentservice.cerpha.payment.repository.PaymentRepository;
 import com.cerpha.paymentservice.cerpha.payment.request.CompletePaymentRequest;
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
 import com.cerpha.paymentservice.common.client.OrderClient;
+import com.cerpha.paymentservice.common.client.product.ProductClient;
+import com.cerpha.paymentservice.common.client.product.request.RestoreStockRequest;
 import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.cerpha.paymentservice.common.exception.ExceptionCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -22,16 +24,18 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
+    private final ProductClient productClient;
 
-    public PaymentService(PaymentRepository paymentRepository, OrderClient orderClient) {
+    public PaymentService(PaymentRepository paymentRepository, OrderClient orderClient, ProductClient productClient) {
         this.paymentRepository = paymentRepository;
         this.orderClient = orderClient;
+        this.productClient = productClient;
     }
 
 
     @Transactional
     public void processPayment(ProcessPaymentRequest request) {
-        makePaymentException(request.getUserId());
+        makePaymentException(request);
 
         Payment payment = Payment.builder()
                 .orderId(request.getOrderId())
@@ -64,9 +68,10 @@ public class PaymentService {
         throw new BusinessException(e.getExceptionCode());
     }
 
-    private void makePaymentException(Long userId) {
+    private void makePaymentException(ProcessPaymentRequest request) {
         // 20 퍼센트는 결제 취소
-        if (userId % 5 == 0) {
+        if (request.getUserId() % 5 == 0) {
+//            productClient.restoreStock(new RestoreStockRequest(request.getOrderProducts()));
             throw new BusinessException(CHANGE_MIND);
         }
     }
