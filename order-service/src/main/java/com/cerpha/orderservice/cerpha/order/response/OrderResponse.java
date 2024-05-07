@@ -1,5 +1,6 @@
 package com.cerpha.orderservice.cerpha.order.response;
 
+import com.cerpha.orderservice.common.client.product.response.OrderProductDetailResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +16,7 @@ public class OrderResponse {
     private String deliveryPhone;
     private Long totalPrice;
     private String status;
-    private List<OrderProductResponse> orderProducts;
+    private List<OrderProductDetailResponse> orderProducts;
     private LocalDateTime updatedAt;
 
     @Builder
@@ -25,7 +26,7 @@ public class OrderResponse {
                          String deliveryPhone,
                          Long totalPrice,
                          String status,
-                         List<OrderProductResponse> orderProducts,
+                         List<OrderProductDetailResponse> orderProducts,
                          LocalDateTime updatedAt) {
         this.userId = userId;
         this.orderId = orderId;

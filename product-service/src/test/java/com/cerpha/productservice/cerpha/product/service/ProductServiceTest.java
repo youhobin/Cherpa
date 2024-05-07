@@ -2,7 +2,7 @@ package com.cerpha.productservice.cerpha.product.service;
 
 import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
-import com.cerpha.productservice.cerpha.product.request.AddOrderProductRequest;
+import com.cerpha.productservice.cerpha.product.request.ProductUnitCountRequest;
 import com.cerpha.productservice.cerpha.product.request.OrderProductListRequest;
 import com.cerpha.productservice.common.exception.BusinessException;
 import com.cerpha.productservice.common.exception.ExceptionCode;
@@ -22,8 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @ActiveProfiles("test")
 class ProductServiceTest {
@@ -37,6 +35,9 @@ class ProductServiceTest {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    ProductStockService productStockService;
+
     @AfterEach
     void tearDown() {
         productRepository.deleteAllInBatch();
@@ -46,23 +47,27 @@ class ProductServiceTest {
     @Test
     public void decreaseProductsStock() throws InterruptedException {
         // given
-        int numThreads = 10;
+        int numThreads = 100;
         CountDownLatch doneSignal = new CountDownLatch(numThreads);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-        Product product = new Product(1L, "신발", "신발입니다.", 10000L, 100L, "hobin");
-        productRepository.save(product);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
 
-        List<AddOrderProductRequest> list = new ArrayList<>();
-        list.add(new AddOrderProductRequest(product.getId(), 2L));
+        Product product = new Product( "신발", "신발입니다.", 10000L, 10000L, "hobin");
+        Product save = productRepository.save(product);
 
-        OrderProductListRequest orderProductListRequest = new OrderProductListRequest(list);
+//        List<ProductUnitCountRequest> list = new ArrayList<>();
+//        list.add(new ProductUnitCountRequest(product.getId(), 2L));
 
+        ProductUnitCountRequest productUnitCountRequest = new ProductUnitCountRequest(save.getId(), 1L);
         // when
         for (int i = 0; i < numThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    productService.decreaseProductsStock(orderProductListRequest);
+                    productStockService.decreaseStock(productUnitCountRequest);
+                } catch (BusinessException e) {
+                    failCount.getAndIncrement();
                 } finally {
                     doneSignal.countDown();
                 }
@@ -75,7 +80,9 @@ class ProductServiceTest {
         Product savedProduct =
                 productRepository.findById(1L)
                         .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
-        Assertions.assertThat(savedProduct.getStock()).isEqualTo(80);
+        Assertions.assertThat(savedProduct.getStock()).isEqualTo(0);
+//        Assertions.assertThat(successCount.get()).isEqualTo(5);
+//        Assertions.assertThat(failCount.get()).isEqualTo(5);
     }
 
 }

@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.*;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_PAYMENT;
 
 @Getter
 @Entity
@@ -32,8 +33,6 @@ public class Order extends BaseTimeEntity {
     @Convert(converter = EncryptionConverter.class)
     private String deliveryPhone;
 
-    private Long totalPrice;
-
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -41,20 +40,20 @@ public class Order extends BaseTimeEntity {
     private Long userId;
 
     @Builder
-    public Order(String deliveryAddress, String deliveryPhone, Long totalPrice, OrderStatus status, Long userId) {
+    public Order(String deliveryAddress, String deliveryPhone, OrderStatus status, Long userId) {
         this.deliveryAddress = deliveryAddress;
         this.deliveryPhone = deliveryPhone;
-        this.totalPrice = totalPrice;
         this.status = status;
         this.userId = userId;
     }
 
     public void cancel() {
-        if (!this.status.equals(PAYMENT)) {
-            throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
+        if (this.status.equals(PAYMENT) || this.status.equals(PAYMENT_WAITING)) {
+            this.status = CANCEL;
+            return;
         }
 
-        this.status = CANCEL;
+        throw new BusinessException(ExceptionCode.NOT_AVAILABLE_CANCEL);
     }
 
     public boolean isRefundable(LocalDate now) {
@@ -83,5 +82,12 @@ public class Order extends BaseTimeEntity {
 
     public void finishRefund() {
         this.status = REFUNDED;
+    }
+
+    public void completeOrderPayment() {
+        if (!this.status.equals(PAYMENT_WAITING)) {
+            throw new BusinessException(NOT_AVAILABLE_PAYMENT);
+        }
+        this.status = PAYMENT;
     }
 }
