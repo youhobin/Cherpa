@@ -1,5 +1,6 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
+import com.cerpha.productservice.cerpha.product.request.AddProductRequest;
 import com.cerpha.productservice.cerpha.product.response.ProductListResponse;
 import com.cerpha.productservice.cerpha.product.response.ProductResponse;
 import com.cerpha.productservice.cerpha.product.response.ProductStockResponse;
@@ -56,6 +57,12 @@ public class ProductController {
     public ResponseEntity<ResultDto<ProductStockResponse>> getProductStock(@PathVariable("productId") Long productId) {
         ProductStockResponse productStock = productService.getProductStock(productId);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productStock));
+    }
+
+    @PostMapping
+    public ResponseEntity addProduct(@RequestBody AddProductRequest addProductRequest) {
+        productService.addProduct(addProductRequest);
+        return null;
     }
 
 }

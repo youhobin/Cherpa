@@ -138,4 +138,17 @@ public class ProductService {
 
         return new ProductStockResponse(product.getId(), product.getStock());
     }
+
+    @Transactional
+    public void addProduct(AddProductRequest addProductRequest) {
+        Product product = Product.builder()
+                .name(addProductRequest.getName())
+                .description(addProductRequest.getDescription())
+                .stock(addProductRequest.getStock())
+                .price(addProductRequest.getPrice())
+                .producer(addProductRequest.getProducer())
+                .build();
+
+        productRepository.save(product);
+    }
 }
