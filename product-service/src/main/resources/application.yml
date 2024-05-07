@@ -65,6 +65,10 @@ env:
       topic:
         stock-decrease: "stock-decrease-topic"
         stock-restore: "stock-restore-topic"
+    producer:
+      topic:
+        rollback-created-order: "rollback-created-order-topic"
+        rollback-payment: "rollback-payment-topic"
 
 logging:
   level:

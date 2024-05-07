@@ -2,6 +2,7 @@ package com.cerpha.productservice.cerpha.product.service;
 
 import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
 import com.cerpha.productservice.cerpha.product.request.RestoreStockRequest;
+import com.cerpha.productservice.common.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProductConsumer {
 
+    private final ProductProducer productProducer;
     private final ProductService productService;
     private final ObjectMapper objectMapper;
 
-    public ProductConsumer(ProductService productService, ObjectMapper objectMapper) {
+    public ProductConsumer(ProductProducer productProducer, ProductService productService, ObjectMapper objectMapper) {
+        this.productProducer = productProducer;
         this.productService = productService;
         this.objectMapper = objectMapper;
     }
@@ -32,7 +35,12 @@ public class ProductConsumer {
             throw new RuntimeException(e);
         }
 
-        productService.decreaseProductsStock(decreaseStockRequest);
+        try {
+            productService.decreaseProductsStock(decreaseStockRequest);
+        } catch (BusinessException e) {
+            log.error("BusinessException", e);
+            productProducer.rollbackCreatedOrder(decreaseStockRequest.getOrderId());
+        }
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.stock-restore}")

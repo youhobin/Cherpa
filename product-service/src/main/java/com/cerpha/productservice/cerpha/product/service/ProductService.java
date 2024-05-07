@@ -97,6 +97,8 @@ public class ProductService {
      */
     public void decreaseProductsStock(DecreaseStockRequest request) {
         request.getOrderProducts().forEach(productStockService::decreaseStock);
+
+
     }
 
 //    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")

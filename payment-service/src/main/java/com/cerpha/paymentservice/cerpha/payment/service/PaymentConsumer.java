@@ -40,4 +40,10 @@ public class PaymentConsumer {
         }
     }
 
+    @KafkaListener(topics = "${env.kafka.consumer.topic.rollback-payment}")
+    public void rollbackPayment(String message) {
+        log.info("kafka listener rollback payment message ={}", message);
+        paymentService.deletePaymentByOrderId(Long.valueOf(message));
+    }
+
 }

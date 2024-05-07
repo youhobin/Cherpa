@@ -4,10 +4,7 @@ import com.cerpha.orderservice.cerpha.order.domain.Order;
 import com.cerpha.orderservice.cerpha.order.domain.OrderProduct;
 import com.cerpha.orderservice.cerpha.order.repository.OrderProductRepository;
 import com.cerpha.orderservice.cerpha.order.repository.OrderRepository;
-import com.cerpha.orderservice.cerpha.order.request.ProcessPaymentRequest;
-import com.cerpha.orderservice.cerpha.order.request.ProductUnitCountRequest;
-import com.cerpha.orderservice.cerpha.order.request.AddOrderRequest;
-import com.cerpha.orderservice.cerpha.order.request.OrderListRequest;
+import com.cerpha.orderservice.cerpha.order.request.*;
 import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
@@ -58,8 +55,6 @@ public class OrderService {
      * 주문 생성 시 결제 진입
      * @param request
      */
-//    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
-//    @Retry(name = "product-service")
     @Transactional
     public void addOrderWithPayment(AddOrderRequest request, Long userId) {
         Order order = Order.builder()
@@ -203,14 +198,17 @@ public class OrderService {
     }
 
     @Transactional
-    public void rollbackCreatedOrder(Long orderId) {
-        List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+    public void rollbackCreatedOrder(OrderRollbackRequest orderRollbackRequest) {
+        Long orderId = orderRollbackRequest.getOrderId();
+        if (orderRollbackRequest.isFullRollback()) {
+            List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
 
-        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
-                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
-                .toList();
-        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-        orderProducer.restoreStock(restoreStockRequest);
+            List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                    .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+                    .toList();
+            RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
+            orderProducer.restoreStock(restoreStockRequest);
+        }
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));

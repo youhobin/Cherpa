@@ -61,6 +61,8 @@ env:
     consumer:
       topic:
         process-payment: "process-payment-topic"
+        rollback-payment: "rollback-payment-topic"
     producer:
       topic:
         rollback-created-order: "rollback-created-order-topic"
+        complete-payment: "complete-payment-topic"
