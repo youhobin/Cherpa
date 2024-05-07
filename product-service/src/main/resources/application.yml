@@ -64,6 +64,7 @@ env:
     consumer:
       topic:
         stock-decrease: "stock-decrease-topic"
+        stock-restore: "stock-restore-topic"
 
 logging:
   level:

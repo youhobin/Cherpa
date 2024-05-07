@@ -25,11 +25,13 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
     private final ProductClient productClient;
+    private final PaymentProducer paymentProducer;
 
-    public PaymentService(PaymentRepository paymentRepository, OrderClient orderClient, ProductClient productClient) {
+    public PaymentService(PaymentRepository paymentRepository, OrderClient orderClient, ProductClient productClient, PaymentProducer paymentProducer) {
         this.paymentRepository = paymentRepository;
         this.orderClient = orderClient;
         this.productClient = productClient;
+        this.paymentProducer = paymentProducer;
     }
 
 
@@ -70,7 +72,7 @@ public class PaymentService {
 
     private void makePaymentException(ProcessPaymentRequest request) {
         // 20 퍼센트는 결제 취소
-        if (request.getUserId() % 5 == 0) {
+        if (request.getUserId() % 5 == 1) {
 //            productClient.restoreStock(new RestoreStockRequest(request.getOrderProducts()));
             throw new BusinessException(CHANGE_MIND);
         }

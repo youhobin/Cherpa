@@ -58,8 +58,8 @@ public class OrderService {
      * 주문 생성 시 결제 진입
      * @param request
      */
-    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
-    @Retry(name = "product-service")
+//    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
+//    @Retry(name = "product-service")
     @Transactional
     public void addOrderWithPayment(AddOrderRequest request, Long userId) {
         Order order = Order.builder()
@@ -200,6 +200,21 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(NOT_FOUND_ORDER));
 
         order.completeOrderPayment();
+    }
+
+    @Transactional
+    public void rollbackCreatedOrder(Long orderId) {
+        List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+
+        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+                .toList();
+        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
+        orderProducer.restoreStock(restoreStockRequest);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
+        order.cancel();
     }
 
     @Scheduled(cron = "${env.order.changeStatusCycle}")

@@ -2,6 +2,7 @@ package com.cerpha.orderservice.cerpha.order.service;
 
 import com.cerpha.orderservice.cerpha.order.request.ProcessPaymentRequest;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
+import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,9 @@ public class OrderProducer {
 
     @Value("${env.kafka.producer.topic.process-payment}")
     private String processPaymentTopic;
+
+    @Value("${env.kafka.producer.topic.stock-restore}")
+    private String restoreStockTopic;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -49,5 +53,17 @@ public class OrderProducer {
 
         kafkaTemplate.send(processPaymentTopic, jsonString);
         log.info("Kafka OrderProducer send Data for Process Payment: " + processPaymentRequest);
+    }
+
+    public void restoreStock(RestoreStockRequest restoreStockRequest) {
+        String jsonString = "";
+        try {
+            jsonString = objectMapper.writeValueAsString(restoreStockRequest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        kafkaTemplate.send(restoreStockTopic, jsonString);
+        log.info("Kafka OrderProducer send Data for Restore Stock: " + restoreStockRequest);
     }
 }

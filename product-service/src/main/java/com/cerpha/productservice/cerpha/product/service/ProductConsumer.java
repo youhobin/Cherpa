@@ -1,7 +1,9 @@
 package com.cerpha.productservice.cerpha.product.service;
 
 import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
+import com.cerpha.productservice.cerpha.product.request.RestoreStockRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,5 +33,17 @@ public class ProductConsumer {
         }
 
         productService.decreaseProductsStock(decreaseStockRequest);
+    }
+
+    @KafkaListener(topics = "${env.kafka.consumer.topic.stock-restore}")
+    public void restoreStock(String message) {
+        log.info("kafka listener restore stock message ={}", message);
+        RestoreStockRequest restoreStockRequest = null;
+        try {
+            restoreStockRequest = objectMapper.readValue(message, RestoreStockRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        productService.restoreStock(restoreStockRequest);
     }
 }

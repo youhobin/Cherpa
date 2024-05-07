@@ -1,6 +1,7 @@
 package com.cerpha.paymentservice.cerpha.payment.service;
 
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
+import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,12 @@ public class PaymentConsumer {
 
     private final PaymentService paymentService;
     private final ObjectMapper objectMapper;
+    private final PaymentProducer paymentProducer;
 
-    public PaymentConsumer(PaymentService paymentService, ObjectMapper objectMapper) {
+    public PaymentConsumer(PaymentService paymentService, ObjectMapper objectMapper, PaymentProducer paymentProducer) {
         this.paymentService = paymentService;
         this.objectMapper = objectMapper;
+        this.paymentProducer = paymentProducer;
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.process-payment}")
@@ -29,7 +32,12 @@ public class PaymentConsumer {
             throw new RuntimeException(e);
         }
 
-        paymentService.processPayment(processPaymentRequest);
+        try {
+            paymentService.processPayment(processPaymentRequest);
+        } catch (BusinessException e) {
+            log.error("BusinessException",e);
+            paymentProducer.rollbackCreatedOrder(processPaymentRequest.getOrderId());
+        }
     }
 
 }
