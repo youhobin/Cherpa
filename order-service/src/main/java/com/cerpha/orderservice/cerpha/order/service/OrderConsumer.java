@@ -39,4 +39,15 @@ public class OrderConsumer {
             log.error("BusinessException", e);
         }
     }
+
+    @KafkaListener(topics = "${env.kafka.consumer.topic.complete-payment}")
+    public void completePayment(String message) {
+        log.info("kafka listener complete payment message ={}", message);
+
+        try {
+            orderService.completeOrderPayment(Long.valueOf(message));
+        } catch (BusinessException e) {
+            log.error("BusinessException", e);
+        }
+    }
 }

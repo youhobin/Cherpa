@@ -56,14 +56,13 @@ public class PaymentService {
 
         // 결제 실패 상황 발생
         if ("FAIL".equals(request.getPaymentMethod())) {
-            orderClient.cancelOrder(request.getOrderId());
+            paymentProducer.rollbackCreatedOrder(request.getOrderId());
             throw new BusinessException(ExceptionCode.PAYMENT_FAIl);
         }
 
         payment.addPaymentMethod(request.getPaymentMethod());
 
         // 결제 완료 시 주문 완료
-//        orderClient.completeOrderPayment(request.getOrderId());
         paymentProducer.completePayment(request.getOrderId());
     }
 
@@ -97,7 +96,7 @@ public class PaymentService {
 
     private void makePaymentException(ProcessPaymentRequest request) {
         // 20 퍼센트는 결제 취소
-        if (request.getUserId() % 5 == 1) {
+        if (request.getUserId() % 5 == 0) {
             throw new BusinessException(CHANGE_MIND);
         }
     }
