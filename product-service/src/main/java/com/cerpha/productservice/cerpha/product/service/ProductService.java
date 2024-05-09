@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.cerpha.productservice.common.exception.ExceptionCode.*;
@@ -29,11 +30,13 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductStockService productStockService;
     private final PaymentClient paymentClient;
+    private final ProductProducer productProducer;
 
-    public ProductService(ProductRepository productRepository, ProductStockService productStockService, PaymentClient paymentClient) {
+    public ProductService(ProductRepository productRepository, ProductStockService productStockService, PaymentClient paymentClient, ProductProducer productProducer) {
         this.productRepository = productRepository;
         this.productStockService = productStockService;
         this.paymentClient = paymentClient;
+        this.productProducer = productProducer;
     }
 
     @Transactional(readOnly = true)
@@ -96,9 +99,16 @@ public class ProductService {
      * @param request
      */
     public void decreaseProductsStock(DecreaseStockRequest request) {
-        request.getOrderProducts().forEach(productStockService::decreaseStock);
+        List<ProductUnitCountRequest> list = new ArrayList<>();
 
-
+        try {
+            request.getOrderProducts().forEach(productUnit -> {
+                list.add(productStockService.decreaseStock(productUnit));
+            });
+        } catch (BusinessException e) {
+            log.error("BusinessException", e);
+            productProducer.rollbackCreatedOrder(new OrderRollbackDto(request.getOrderId(), list));
+        }
     }
 
 //    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")

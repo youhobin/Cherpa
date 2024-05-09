@@ -1,6 +1,8 @@
 package com.cerpha.productservice.cerpha.product.service;
 
+import com.cerpha.productservice.cerpha.product.request.OrderRollbackDto;
 import com.cerpha.productservice.cerpha.product.request.OrderRollbackRequest;
+import com.cerpha.productservice.cerpha.product.request.RestoreStockRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,26 +21,20 @@ public class ProductProducer {
     private String paymentRollbackTopic;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final ProductStockService productStockService;
 
-    public ProductProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+    public ProductProducer(KafkaTemplate<String, String> kafkaTemplate, ProductStockService productStockService) {
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
+        this.productStockService = productStockService;
     }
 
-    public void rollbackCreatedOrder(Long orderId) {
-        OrderRollbackRequest orderRollbackRequest = new OrderRollbackRequest(orderId, false);
-        String jsonString = "";
-        try {
-            jsonString = objectMapper.writeValueAsString(orderRollbackRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+    public void rollbackCreatedOrder(OrderRollbackDto orderRollbackDto) {
+        // 재고 롤백
+        orderRollbackDto.getOrderProducts().forEach(productStockService::restoreStock);
         // 주문 롤백
-        kafkaTemplate.send(orderRollbackTopic, jsonString);
+        kafkaTemplate.send(orderRollbackTopic, String.valueOf(orderRollbackDto.getOrderId()));
         // 결제 롤백
-        kafkaTemplate.send(paymentRollbackTopic, String.valueOf(orderId));
-        log.info("Kafka PaymentProducer send Data for rollback created order: " + orderId);
+        kafkaTemplate.send(paymentRollbackTopic, String.valueOf(orderRollbackDto.getOrderId()));
+        log.info("Kafka PaymentProducer send Data for rollback created order: " + orderRollbackDto.getOrderId());
     }
 }

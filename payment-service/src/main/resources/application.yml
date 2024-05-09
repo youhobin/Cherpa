@@ -64,5 +64,5 @@ env:
         rollback-payment: "rollback-payment-topic"
     producer:
       topic:
-        rollback-created-order: "rollback-created-order-topic"
+        cancel-created-order: "cancel-created-order-topic"
         complete-payment: "complete-payment-topic"

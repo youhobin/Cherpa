@@ -7,11 +7,8 @@ import com.cerpha.paymentservice.cerpha.payment.request.CompletePaymentRequest;
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
 import com.cerpha.paymentservice.common.client.OrderClient;
 import com.cerpha.paymentservice.common.client.product.ProductClient;
-import com.cerpha.paymentservice.common.client.product.request.RestoreStockRequest;
 import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.cerpha.paymentservice.common.exception.ExceptionCode;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +53,7 @@ public class PaymentService {
 
         // 결제 실패 상황 발생
         if ("FAIL".equals(request.getPaymentMethod())) {
-            paymentProducer.rollbackCreatedOrder(request.getOrderId());
+            paymentProducer.cancelCreatedOrder(request.getOrderId());
             throw new BusinessException(ExceptionCode.PAYMENT_FAIl);
         }
 

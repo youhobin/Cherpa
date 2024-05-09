@@ -53,6 +53,7 @@ public class OrderService {
 
     /**
      * 주문 생성 시 결제 진입
+     *
      * @param request
      */
     @Transactional
@@ -71,7 +72,7 @@ public class OrderService {
                         .order(order)
                         .productId(op.getProductId())
                         .unitCount(op.getUnitCount())
-                        .build())
+                        .build()) 
                 .toList();
 
         orderProductRepository.saveAll(orderProducts);
@@ -87,6 +88,7 @@ public class OrderService {
 
     /**
      * 주문 생성 시 결제 진입
+     *
      * @param request
      */
 //    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
@@ -122,7 +124,6 @@ public class OrderService {
 //        productClient.restoreStock(new RestoreStockRequest(request.getOrderProducts()));
 //        throw new FeignClientException(e.getExceptionResponse());
 //    }
-
     public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
         throw new BusinessException(e.getExceptionCode());
     }
@@ -198,17 +199,34 @@ public class OrderService {
     }
 
     @Transactional
-    public void rollbackCreatedOrder(OrderRollbackRequest orderRollbackRequest) {
-        Long orderId = orderRollbackRequest.getOrderId();
-        if (orderRollbackRequest.isFullRollback()) {
-            List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+    public void rollbackCreatedOrder(Long orderId) {
+        orderProductRepository.deleteAllByOrderId(orderId);
+        orderRepository.deleteById(orderId);
+//        Long orderId = orderRollbackRequest.getOrderId();
+//        if (orderRollbackRequest.isFullRollback()) {
+//            List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+//
+//            List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+//                    .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+//                    .toList();
+//            RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
+//            orderProducer.restoreStock(restoreStockRequest);
+//        }
+//
+//        Order order = orderRepository.findById(orderId)
+//                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
+//        order.cancel();
+    }
 
-            List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
-                    .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
-                    .toList();
-            RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-            orderProducer.restoreStock(restoreStockRequest);
-        }
+    @Transactional
+    public void cancelCreatedOrder(Long orderId) {
+        List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
+
+        List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
+                .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
+                .toList();
+        RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
+        orderProducer.restoreStock(restoreStockRequest);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));

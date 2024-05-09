@@ -26,18 +26,25 @@ public class OrderConsumer {
     @KafkaListener(topics = "${env.kafka.consumer.topic.rollback-created-order}")
     public void rollbackCreatedOrder(String message) {
         log.info("kafka listener rollback created order message ={}", message);
-        OrderRollbackRequest orderRollbackRequest = null;
-        try {
-            orderRollbackRequest = objectMapper.readValue(message, OrderRollbackRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+//        OrderRollbackRequest orderRollbackRequest = null;
+//        try {
+//            orderRollbackRequest = objectMapper.readValue(message, OrderRollbackRequest.class);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
 
         try {
-            orderService.rollbackCreatedOrder(orderRollbackRequest);
+            orderService.rollbackCreatedOrder(Long.valueOf(message));
         } catch (BusinessException e) {
             log.error("BusinessException", e);
         }
+    }
+
+    @KafkaListener(topics = "${env.kafka.consumer.topic.cancel-created-order}")
+    public void cancelOrder(String message) {
+        log.info("kafka listener cancel order message ={}", message);
+
+        orderService.cancelCreatedOrder(Long.valueOf(message));
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.complete-payment}")

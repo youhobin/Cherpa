@@ -22,11 +22,12 @@ public class ProductStockService {
     }
 
     @DistributedLock(key = "#request.getProductId()")
-    public void decreaseStock(ProductUnitCountRequest request) {
+    public ProductUnitCountRequest decreaseStock(ProductUnitCountRequest request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_PRODUCT));
 
         product.decreaseStock(request.getUnitCount());
+        return request;
     }
 
     @DistributedLock(key = "#request.getProductId()")

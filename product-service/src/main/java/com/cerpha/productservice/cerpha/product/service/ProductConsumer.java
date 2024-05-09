@@ -35,12 +35,12 @@ public class ProductConsumer {
             throw new RuntimeException(e);
         }
 
-        try {
-            productService.decreaseProductsStock(decreaseStockRequest);
-        } catch (BusinessException e) {
-            log.error("BusinessException", e);
-            productProducer.rollbackCreatedOrder(decreaseStockRequest.getOrderId());
-        }
+//        try {
+        productService.decreaseProductsStock(decreaseStockRequest);
+//        } catch (BusinessException e) {
+//            log.error("BusinessException", e);
+//            productProducer.rollbackCreatedOrder(decreaseStockRequest.getOrderId());
+//        }
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.stock-restore}")

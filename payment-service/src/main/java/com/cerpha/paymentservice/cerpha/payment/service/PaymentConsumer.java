@@ -36,7 +36,7 @@ public class PaymentConsumer {
             paymentService.processPayment(processPaymentRequest);
         } catch (BusinessException e) {
             log.error("BusinessException",e);
-            paymentProducer.rollbackCreatedOrder(processPaymentRequest.getOrderId());
+            paymentProducer.cancelCreatedOrder(processPaymentRequest.getOrderId());
         }
     }
 
