@@ -5,29 +5,24 @@ import com.cerpha.paymentservice.cerpha.payment.domain.PaymentStatus;
 import com.cerpha.paymentservice.cerpha.payment.repository.PaymentRepository;
 import com.cerpha.paymentservice.cerpha.payment.request.CompletePaymentRequest;
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
-import com.cerpha.paymentservice.common.client.OrderClient;
-import com.cerpha.paymentservice.common.client.product.ProductClient;
 import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.cerpha.paymentservice.common.exception.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.cerpha.paymentservice.common.exception.ExceptionCode.*;
+import static com.cerpha.paymentservice.common.exception.ExceptionCode.CHANGE_MIND;
+import static com.cerpha.paymentservice.common.exception.ExceptionCode.NOT_FOUND_PAYMENT;
 
 @Slf4j
 @Service
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrderClient orderClient;
-    private final ProductClient productClient;
     private final PaymentProducer paymentProducer;
 
-    public PaymentService(PaymentRepository paymentRepository, OrderClient orderClient, ProductClient productClient, PaymentProducer paymentProducer) {
+    public PaymentService(PaymentRepository paymentRepository, PaymentProducer paymentProducer) {
         this.paymentRepository = paymentRepository;
-        this.orderClient = orderClient;
-        this.productClient = productClient;
         this.paymentProducer = paymentProducer;
     }
 
@@ -44,8 +39,6 @@ public class PaymentService {
         paymentRepository.save(payment);
     }
 
-//    @CircuitBreaker(name = "order-service", fallbackMethod = "completePaymentFallback")
-//    @Retry(name = "order-service")
     @Transactional
     public void completePayment(CompletePaymentRequest request) {
         Payment payment = paymentRepository.findByOrderIdAndPaymentStatus(request.getOrderId(), PaymentStatus.PAYMENT_WAIT)
@@ -62,25 +55,6 @@ public class PaymentService {
         // 결제 완료 시 주문 완료
         paymentProducer.completePayment(request.getOrderId());
     }
-
-//    @CircuitBreaker(name = "order-service", fallbackMethod = "completePaymentFallback")
-//    @Retry(name = "order-service")
-//    @Transactional
-//    public void completePayment(CompletePaymentRequest request) {
-//        Payment payment = paymentRepository.findByOrderIdAndPaymentStatus(request.getOrderId(), PaymentStatus.PAYMENT_WAIT)
-//                .orElseThrow(() -> new BusinessException(NOT_FOUND_PAYMENT));
-//
-//        // 결제 실패 상황 발생
-//        if ("FAIL".equals(request.getPaymentMethod())) {
-//            orderClient.cancelOrder(request.getOrderId());
-//            throw new BusinessException(ExceptionCode.PAYMENT_FAIl);
-//        }
-//
-//        payment.addPaymentMethod(request.getPaymentMethod());
-//
-//        // 결제 완료 시 주문 완료
-//        orderClient.completeOrderPayment(request.getOrderId());
-//    }
 
     @Transactional
     public void deletePaymentByOrderId(Long orderId) {

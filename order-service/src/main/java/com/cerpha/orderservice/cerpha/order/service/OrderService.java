@@ -4,11 +4,13 @@ import com.cerpha.orderservice.cerpha.order.domain.Order;
 import com.cerpha.orderservice.cerpha.order.domain.OrderProduct;
 import com.cerpha.orderservice.cerpha.order.repository.OrderProductRepository;
 import com.cerpha.orderservice.cerpha.order.repository.OrderRepository;
-import com.cerpha.orderservice.cerpha.order.request.*;
+import com.cerpha.orderservice.cerpha.order.request.AddOrderRequest;
+import com.cerpha.orderservice.cerpha.order.request.OrderListRequest;
+import com.cerpha.orderservice.cerpha.order.request.ProcessPaymentRequest;
+import com.cerpha.orderservice.cerpha.order.request.ProductUnitCountRequest;
 import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
 import com.cerpha.orderservice.cerpha.order.response.OrderResponse;
 import com.cerpha.orderservice.cerpha.wishlist.service.WishlistService;
-import com.cerpha.orderservice.common.client.exception.FeignClientException;
 import com.cerpha.orderservice.common.client.product.ProductClient;
 import com.cerpha.orderservice.common.client.product.request.DecreaseStockRequest;
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
@@ -30,7 +32,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.cerpha.orderservice.cerpha.order.domain.OrderStatus.*;
-import static com.cerpha.orderservice.common.exception.ExceptionCode.*;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_AVAILABLE_CANCEL;
+import static com.cerpha.orderservice.common.exception.ExceptionCode.NOT_FOUND_ORDER;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -86,44 +89,6 @@ public class OrderService {
         orderProducer.processPayment(new ProcessPaymentRequest(userId, savedOrder.getId()));
     }
 
-    /**
-     * 주문 생성 시 결제 진입
-     *
-     * @param request
-     */
-//    @CircuitBreaker(name = "product-service", fallbackMethod = "addOrderWithPaymentFallback")
-//    @Retry(name = "product-service")
-//    @Transactional
-//    public void addOrderWithPayment(AddOrderRequest request, Long userId) {
-//        Order order = Order.builder()
-//                .deliveryAddress(request.getDeliveryAddress())
-//                .deliveryPhone(request.getDeliveryPhone())
-//                .status(PAYMENT_WAITING)
-//                .userId(userId)
-//                .build();
-//
-//        Order savedOrder = orderRepository.save(order);
-//
-//        List<OrderProduct> orderProducts = request.getOrderProducts().stream()
-//                .map(op -> OrderProduct.builder()
-//                        .order(order)
-//                        .productId(op.getProductId())
-//                        .unitCount(op.getUnitCount())
-//                        .build())
-//                .toList();
-//
-//        orderProductRepository.saveAll(orderProducts);
-//
-//        wishlistService.deleteAllWishList(userId);
-//
-//        // 재고 감소
-//        productClient.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(),request.getOrderProducts()));
-//    }
-
-//    public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, FeignClientException e) {
-//        productClient.restoreStock(new RestoreStockRequest(request.getOrderProducts()));
-//        throw new FeignClientException(e.getExceptionResponse());
-//    }
     public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
         throw new BusinessException(e.getExceptionCode());
     }
@@ -183,7 +148,7 @@ public class OrderService {
         order.cancel();
 
         RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-        productClient.restoreStock(restoreStockRequest);
+        orderProducer.restoreStock(restoreStockRequest);
     }
 
     public void cancelOrderFallback(Long orderId, BusinessException e) {
@@ -202,20 +167,6 @@ public class OrderService {
     public void rollbackCreatedOrder(Long orderId) {
         orderProductRepository.deleteAllByOrderId(orderId);
         orderRepository.deleteById(orderId);
-//        Long orderId = orderRollbackRequest.getOrderId();
-//        if (orderRollbackRequest.isFullRollback()) {
-//            List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
-//
-//            List<ProductUnitCountRequest> productUnitCountRequests = orderProducts.stream()
-//                    .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
-//                    .toList();
-//            RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-//            orderProducer.restoreStock(restoreStockRequest);
-//        }
-//
-//        Order order = orderRepository.findById(orderId)
-//                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));
-//        order.cancel();
     }
 
     @Transactional

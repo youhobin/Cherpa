@@ -16,22 +16,14 @@ import static com.cerpha.orderservice.common.exception.ExceptionCode.CHANGE_MIND
 public class OrderConsumer {
 
     private final OrderService orderService;
-    private final ObjectMapper objectMapper;
 
-    public OrderConsumer(OrderService orderService, ObjectMapper objectMapper) {
+    public OrderConsumer(OrderService orderService) {
         this.orderService = orderService;
-        this.objectMapper = objectMapper;
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.rollback-created-order}")
     public void rollbackCreatedOrder(String message) {
         log.info("kafka listener rollback created order message ={}", message);
-//        OrderRollbackRequest orderRollbackRequest = null;
-//        try {
-//            orderRollbackRequest = objectMapper.readValue(message, OrderRollbackRequest.class);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
 
         try {
             orderService.rollbackCreatedOrder(Long.valueOf(message));

@@ -4,13 +4,9 @@ import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
 import com.cerpha.productservice.cerpha.product.request.*;
 import com.cerpha.productservice.cerpha.product.response.*;
-import com.cerpha.productservice.common.client.exception.FeignClientException;
 import com.cerpha.productservice.common.client.payment.PaymentClient;
-import com.cerpha.productservice.common.client.payment.request.ProcessPaymentRequest;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.exception.BusinessException;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cerpha.productservice.common.exception.ExceptionCode.*;
+import static com.cerpha.productservice.common.exception.ExceptionCode.NOT_FOUND_PRODUCT;
 
 @Slf4j
 @Service
@@ -110,15 +106,6 @@ public class ProductService {
             productProducer.rollbackCreatedOrder(new OrderRollbackDto(request.getOrderId(), list));
         }
     }
-
-//    @CircuitBreaker(name = "order-service", fallbackMethod = "decreaseProductsStockFallback")
-//    @Retry(name = "order-service")
-//    public void decreaseProductsStock(DecreaseStockRequest request) {
-//        request.getOrderProducts().forEach(productStockService::decreaseStock);
-//
-//        // 결제 진입
-//        paymentClient.processPayment(new ProcessPaymentRequest(request.getUserId(), request.getOrderId(), request.getOrderProducts()));
-//    }
 
     public void decreaseProductsStockFallback(DecreaseStockRequest request, BusinessException e) {
         throw new BusinessException(e.getExceptionCode());
