@@ -5,6 +5,9 @@ import com.cerpha.paymentservice.cerpha.payment.domain.PaymentStatus;
 import com.cerpha.paymentservice.cerpha.payment.repository.PaymentRepository;
 import com.cerpha.paymentservice.cerpha.payment.request.CompletePaymentRequest;
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
+import com.cerpha.paymentservice.common.event.EventProvider;
+import com.cerpha.paymentservice.common.event.OrderCancelEvent;
+import com.cerpha.paymentservice.common.event.PaymentCompleteEvent;
 import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.cerpha.paymentservice.common.exception.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +23,12 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentProducer paymentProducer;
+    private final EventProvider eventProvider;
 
-    public PaymentService(PaymentRepository paymentRepository, PaymentProducer paymentProducer) {
+    public PaymentService(PaymentRepository paymentRepository, PaymentProducer paymentProducer, EventProvider eventProvider) {
         this.paymentRepository = paymentRepository;
         this.paymentProducer = paymentProducer;
+        this.eventProvider = eventProvider;
     }
 
 
@@ -46,14 +51,16 @@ public class PaymentService {
 
         // 결제 실패 상황 발생
         if ("FAIL".equals(request.getPaymentMethod())) {
-            paymentProducer.cancelCreatedOrder(request.getOrderId());
+//            paymentProducer.cancelCreatedOrder(request.getOrderId());
+            eventProvider.produceEvent(new OrderCancelEvent(request.getOrderId()));
             throw new BusinessException(ExceptionCode.PAYMENT_FAIl);
         }
 
         payment.addPaymentMethod(request.getPaymentMethod());
 
         // 결제 완료 시 주문 완료
-        paymentProducer.completePayment(request.getOrderId());
+//        paymentProducer.completePayment(request.getOrderId());
+        eventProvider.produceEvent(new PaymentCompleteEvent(request.getOrderId()));
     }
 
     @Transactional

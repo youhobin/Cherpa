@@ -16,6 +16,7 @@ import com.cerpha.orderservice.common.client.product.request.DecreaseStockReques
 import com.cerpha.orderservice.common.client.product.request.OrderProductListRequest;
 import com.cerpha.orderservice.common.client.product.request.RestoreStockRequest;
 import com.cerpha.orderservice.common.client.product.response.OrderProductDetailResponse;
+import com.cerpha.orderservice.common.event.EventProvider;
 import com.cerpha.orderservice.common.exception.BusinessException;
 import com.cerpha.orderservice.common.exception.ExceptionCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -45,13 +46,15 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final WishlistService wishlistService;
     private final OrderProducer orderProducer;
+    private final EventProvider eventProvider;
 
-    public OrderService(OrderRepository orderRepository, ProductClient productClient, OrderProductRepository orderProductRepository, WishlistService wishlistService, OrderProducer orderProducer) {
+    public OrderService(OrderRepository orderRepository, ProductClient productClient, OrderProductRepository orderProductRepository, WishlistService wishlistService, OrderProducer orderProducer, EventProvider eventProvider) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
         this.orderProductRepository = orderProductRepository;
         this.wishlistService = wishlistService;
         this.orderProducer = orderProducer;
+        this.eventProvider = eventProvider;
     }
 
     /**
@@ -82,15 +85,11 @@ public class OrderService {
 
         wishlistService.deleteAllWishList(userId);
 
-        // 재고 감소 kafka
-        orderProducer.decreaseStock(new DecreaseStockRequest(userId, savedOrder.getId(), request.getOrderProducts()));
+        // 재고
+        eventProvider.produceEvent(new DecreaseStockRequest(userId, savedOrder.getId(), request.getOrderProducts()));
 
         // 결제
-        orderProducer.processPayment(new ProcessPaymentRequest(userId, savedOrder.getId()));
-    }
-
-    public void addOrderWithPaymentFallback(AddOrderRequest request, Long userId, BusinessException e) {
-        throw new BusinessException(e.getExceptionCode());
+        eventProvider.produceEvent(new ProcessPaymentRequest(userId, savedOrder.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -133,8 +132,8 @@ public class OrderService {
 
     }
 
-    @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
-    @Retry(name = "product-service")
+//    @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
+//    @Retry(name = "product-service")
     @Transactional
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);
@@ -148,11 +147,7 @@ public class OrderService {
         order.cancel();
 
         RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-        orderProducer.restoreStock(restoreStockRequest);
-    }
-
-    public void cancelOrderFallback(Long orderId, BusinessException e) {
-        throw new BusinessException(NOT_AVAILABLE_CANCEL);
+        eventProvider.produceEvent(restoreStockRequest);
     }
 
     @Transactional
@@ -177,7 +172,7 @@ public class OrderService {
                 .map(op -> new ProductUnitCountRequest(op.getProductId(), op.getUnitCount()))
                 .toList();
         RestoreStockRequest restoreStockRequest = new RestoreStockRequest(productUnitCountRequests);
-        orderProducer.restoreStock(restoreStockRequest);
+        eventProvider.produceEvent(restoreStockRequest);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_FOUND_ORDER));

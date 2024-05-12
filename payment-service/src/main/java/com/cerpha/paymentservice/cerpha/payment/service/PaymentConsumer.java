@@ -1,6 +1,8 @@
 package com.cerpha.paymentservice.cerpha.payment.service;
 
 import com.cerpha.paymentservice.cerpha.payment.request.ProcessPaymentRequest;
+import com.cerpha.paymentservice.common.event.EventProvider;
+import com.cerpha.paymentservice.common.event.OrderCancelEvent;
 import com.cerpha.paymentservice.common.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,11 +17,13 @@ public class PaymentConsumer {
     private final PaymentService paymentService;
     private final ObjectMapper objectMapper;
     private final PaymentProducer paymentProducer;
+    private final EventProvider eventProvider;
 
-    public PaymentConsumer(PaymentService paymentService, ObjectMapper objectMapper, PaymentProducer paymentProducer) {
+    public PaymentConsumer(PaymentService paymentService, ObjectMapper objectMapper, PaymentProducer paymentProducer, EventProvider eventProvider) {
         this.paymentService = paymentService;
         this.objectMapper = objectMapper;
         this.paymentProducer = paymentProducer;
+        this.eventProvider = eventProvider;
     }
 
     @KafkaListener(topics = "${env.kafka.consumer.topic.process-payment}")
@@ -36,7 +40,9 @@ public class PaymentConsumer {
             paymentService.processPayment(processPaymentRequest);
         } catch (BusinessException e) {
             log.error("BusinessException",e);
-            paymentProducer.cancelCreatedOrder(processPaymentRequest.getOrderId());
+            eventProvider.produceEvent(new OrderCancelEvent(processPaymentRequest.getOrderId()));
+//            paymentProducer.cancelCreatedOrder(processPaymentRequest.getOrderId());
+
         }
     }
 

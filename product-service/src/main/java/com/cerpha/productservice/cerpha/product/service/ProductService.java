@@ -6,6 +6,7 @@ import com.cerpha.productservice.cerpha.product.request.*;
 import com.cerpha.productservice.cerpha.product.response.*;
 import com.cerpha.productservice.common.client.payment.PaymentClient;
 import com.cerpha.productservice.common.dto.PageResponseDto;
+import com.cerpha.productservice.common.event.EventProvider;
 import com.cerpha.productservice.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,14 +26,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductStockService productStockService;
-    private final PaymentClient paymentClient;
     private final ProductProducer productProducer;
+    private final EventProvider eventProvider;
 
-    public ProductService(ProductRepository productRepository, ProductStockService productStockService, PaymentClient paymentClient, ProductProducer productProducer) {
+    public ProductService(ProductRepository productRepository, ProductStockService productStockService, ProductProducer productProducer, EventProvider eventProvider) {
         this.productRepository = productRepository;
         this.productStockService = productStockService;
-        this.paymentClient = paymentClient;
         this.productProducer = productProducer;
+        this.eventProvider = eventProvider;
     }
 
     @Transactional(readOnly = true)
@@ -103,12 +104,8 @@ public class ProductService {
             });
         } catch (BusinessException e) {
             log.error("BusinessException", e);
-            productProducer.rollbackCreatedOrder(new OrderRollbackDto(request.getOrderId(), list));
+            eventProvider.produceEvent(new OrderRollbackDto(request.getOrderId(), list));
         }
-    }
-
-    public void decreaseProductsStockFallback(DecreaseStockRequest request, BusinessException e) {
-        throw new BusinessException(e.getExceptionCode());
     }
 
     @Transactional(readOnly = true)
