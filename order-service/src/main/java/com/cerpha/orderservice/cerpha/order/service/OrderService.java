@@ -132,8 +132,6 @@ public class OrderService {
 
     }
 
-//    @CircuitBreaker(name = "product-service", fallbackMethod = "cancelOrderFallback")
-//    @Retry(name = "product-service")
     @Transactional
     public void cancelOrder(Long orderId) {
         List<OrderProduct> orderProducts = orderProductRepository.findOrderProductsByOrderId(orderId);

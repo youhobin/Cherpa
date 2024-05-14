@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 public class OutboxProcessPaymentDto {
 
     private Long id;
+    private String event;
 
-    public OutboxProcessPaymentDto(Long id) {
+    public OutboxProcessPaymentDto(Long id, String event) {
         this.id = id;
+        this.event = event;
     }
 }

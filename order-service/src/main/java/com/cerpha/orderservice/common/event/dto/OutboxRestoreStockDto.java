@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 public class OutboxRestoreStockDto {
 
     private Long id;
+    private String event;
 
-    public OutboxRestoreStockDto(Long id) {
+    public OutboxRestoreStockDto(Long id, String event) {
         this.id = id;
+        this.event = event;
     }
 }

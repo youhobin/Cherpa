@@ -42,26 +42,26 @@ public class OutboxEventConsumer {
     @TransactionalEventListener(classes = OutboxDecreaseStockDto.class, phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(OutboxDecreaseStockDto dto) {
-        Event event = outboxEventService.updatePublished(dto.getId());
-        kafkaTemplate.send(decreaseStockTopic, event.getEvent());
-        log.info("Kafka OrderProducer send Data for Decrease Stock: " + event.getEvent());
+        outboxEventService.updatePublished(dto.getId());
+        kafkaTemplate.send(decreaseStockTopic, dto.getEvent());
+        log.info("Kafka OrderProducer send Data for Decrease Stock: " + dto.getEvent());
     }
 
     @Async(EVENT_EXECUTOR)
     @TransactionalEventListener(classes = OutboxProcessPaymentDto.class, phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(OutboxProcessPaymentDto dto) {
-        Event event = outboxEventService.updatePublished(dto.getId());
-        kafkaTemplate.send(processPaymentTopic, event.getEvent());
-        log.info("Kafka OrderProducer send Data for Process Payment: " + event.getEvent());
+        outboxEventService.updatePublished(dto.getId());
+        kafkaTemplate.send(processPaymentTopic, dto.getEvent());
+        log.info("Kafka OrderProducer send Data for Process Payment: " + dto.getEvent());
     }
 
     @Async(EVENT_EXECUTOR)
     @TransactionalEventListener(classes = OutboxRestoreStockDto.class, phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(OutboxRestoreStockDto dto) {
-        Event event = outboxEventService.updatePublished(dto.getId());
-        kafkaTemplate.send(restoreStockTopic, event.getEvent());
-        log.info("Kafka OrderProducer send Data for Restore Stock: " + event.getEvent());
+        outboxEventService.updatePublished(dto.getId());
+        kafkaTemplate.send(restoreStockTopic, dto.getEvent());
+        log.info("Kafka OrderProducer send Data for Restore Stock: " + dto.getEvent());
     }
 }

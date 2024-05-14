@@ -1,6 +1,6 @@
 services:
-  mariadb:
-    container_name: mariadb
+  orderdb:
+    container_name: orderdb
     image: mariadb:10
     ports:
       - 13306:3306
@@ -8,6 +8,60 @@ services:
       - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
       - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
       - ~/docker/mariadb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  userdb:
+    container_name: userdb
+    image: mariadb:10
+    ports:
+      - 23306:3306
+    volumes:
+      - ~/docker/userdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/userdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/userdb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  productdb:
+    container_name: productdb
+    image: mariadb:10
+    ports:
+      - 33306:3306
+    volumes:
+      - ~/docker/productdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/productdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/productdb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  paymentdb:
+    container_name: paymentdb
+    image: mariadb:10
+    ports:
+      - 43306:3306
+    volumes:
+      - ~/docker/paymentdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/paymentdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/paymentdb/var/log/maria:/var/log/maria
     environment:
       - TZ="Asia/Seoul"
       - ALLOW_EMPTY_PASSWORD=no

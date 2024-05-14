@@ -9,11 +9,12 @@ import com.cerpha.orderservice.common.event.dto.OutboxProcessPaymentDto;
 import com.cerpha.orderservice.common.event.dto.OutboxRestoreStockDto;
 import com.cerpha.orderservice.common.event.producer.OutboxEventProducer;
 import com.cerpha.orderservice.common.event.repository.EventRepository;
-import com.cerpha.orderservice.common.exception.BusinessException;
-import com.cerpha.orderservice.common.exception.ExceptionCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.cerpha.orderservice.common.event.domain.EventType.*;
 
@@ -30,12 +31,8 @@ public class OutboxEventService {
         this.objectMapper = objectMapper;
     }
 
-    public Event updatePublished(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ExceptionCode.EVENT_NOT_FOUND));
-
-        eventRepository.updatePublished(event.getId());
-        return event;
+    public void updatePublished(Long id) {
+        eventRepository.updatePublished(id);
     }
 
     public void saveDecreaseStock(DecreaseStockRequest decreaseStockRequest) {
@@ -48,7 +45,7 @@ public class OutboxEventService {
 
         Event event = new Event(jsonString, DECREASE_STOCK);
         Event outboxEvent = eventRepository.save(event);
-        outboxEventProducer.produceEvent(new OutboxDecreaseStockDto(outboxEvent.getId()));
+        outboxEventProducer.produceEvent(new OutboxDecreaseStockDto(outboxEvent.getId(), jsonString));
     }
 
     public void saveProcessPayment(ProcessPaymentRequest processPaymentRequest) {
@@ -61,7 +58,7 @@ public class OutboxEventService {
 
         Event event = new Event(jsonString, PROCESS_PAYMENT);
         Event outboxEvent = eventRepository.save(event);
-        outboxEventProducer.produceEvent(new OutboxProcessPaymentDto(outboxEvent.getId()));
+        outboxEventProducer.produceEvent(new OutboxProcessPaymentDto(outboxEvent.getId(), jsonString));
     }
 
     public void saveRestoreStock(RestoreStockRequest restoreStockRequest) {
@@ -74,6 +71,11 @@ public class OutboxEventService {
 
         Event event = new Event(jsonString, RESTORE_STOCK);
         Event outboxEvent = eventRepository.save(event);
-        outboxEventProducer.produceEvent(new OutboxRestoreStockDto(outboxEvent.getId()));
+        outboxEventProducer.produceEvent(new OutboxRestoreStockDto(outboxEvent.getId(), jsonString));
+    }
+
+    public List<Event> findAllNotPublishedEvent() {
+        LocalDateTime time = LocalDateTime.now().minusMinutes(2);
+        return eventRepository.findAllNotPublishedEvent(time);
     }
 }
