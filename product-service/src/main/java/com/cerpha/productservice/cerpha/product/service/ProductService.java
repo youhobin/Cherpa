@@ -4,23 +4,21 @@ import com.cerpha.productservice.cerpha.product.domain.Product;
 import com.cerpha.productservice.cerpha.product.repository.ProductRepository;
 import com.cerpha.productservice.cerpha.product.request.*;
 import com.cerpha.productservice.cerpha.product.response.*;
+import com.cerpha.productservice.common.client.payment.PaymentClient;
 import com.cerpha.productservice.common.dto.PageResponseDto;
+import com.cerpha.productservice.common.event.EventProvider;
 import com.cerpha.productservice.common.exception.BusinessException;
-import com.cerpha.productservice.common.exception.ExceptionCode;
-import com.cerpha.productservice.common.redis.DistributedLock;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static com.cerpha.productservice.common.exception.ExceptionCode.*;
+import static com.cerpha.productservice.common.exception.ExceptionCode.NOT_FOUND_PRODUCT;
 
 @Slf4j
 @Service
@@ -28,10 +26,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductStockService productStockService;
+    private final ProductProducer productProducer;
+    private final EventProvider eventProvider;
 
-    public ProductService(ProductRepository productRepository, ProductStockService productStockService) {
+    public ProductService(ProductRepository productRepository, ProductStockService productStockService, ProductProducer productProducer, EventProvider eventProvider) {
         this.productRepository = productRepository;
         this.productStockService = productStockService;
+        this.productProducer = productProducer;
+        this.eventProvider = eventProvider;
     }
 
     @Transactional(readOnly = true)
@@ -89,8 +91,21 @@ public class ProductService {
         return new OrderProductListResponse(orderProductResponses);
     }
 
-    public void decreaseProductsStock(OrderProductListRequest request) {
-        request.getOrderProducts().forEach(productStockService::decreaseStock);
+    /**
+     * 재고 감소
+     * @param request
+     */
+    public void decreaseProductsStock(DecreaseStockRequest request) {
+        List<ProductUnitCountRequest> list = new ArrayList<>();
+
+        try {
+            request.getOrderProducts().forEach(productUnit -> {
+                list.add(productStockService.decreaseStock(productUnit));
+            });
+        } catch (BusinessException e) {
+            log.error("BusinessException", e);
+            eventProvider.produceEvent(new OrderRollbackDto(request.getOrderId(), list));
+        }
     }
 
     @Transactional(readOnly = true)
@@ -107,12 +122,27 @@ public class ProductService {
 
     @Transactional
     public void restoreStock(RestoreStockRequest request) {
-        request.getOrderProducts()
-                .forEach(op -> {
-                    Product product = productRepository.findById(op.getProductId())
-                            .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
+        request.getOrderProducts().forEach(productStockService::restoreStock);
+    }
 
-                    product.restoreStock(op.getUnitCount());
-                });
+    @Transactional(readOnly = true)
+    public ProductStockResponse getProductStock(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(NOT_FOUND_PRODUCT));
+
+        return new ProductStockResponse(product.getId(), product.getStock());
+    }
+
+    @Transactional
+    public void addProduct(AddProductRequest addProductRequest) {
+        Product product = Product.builder()
+                .name(addProductRequest.getName())
+                .description(addProductRequest.getDescription())
+                .stock(addProductRequest.getStock())
+                .price(addProductRequest.getPrice())
+                .producer(addProductRequest.getProducer())
+                .build();
+
+        productRepository.save(product);
     }
 }

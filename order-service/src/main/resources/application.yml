@@ -9,7 +9,6 @@ spring:
     url: jdbc:mariadb://localhost:13306/shop
     username: hobin
     password: zaq12wsx
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,35 +17,24 @@ spring:
         format_sql: true
         default_batch_fetch_size: 1000
         show_sql: true
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: q77642260@gmail.com
-    password: abqacnnbukvivoxz
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          ssl:
-            trust: smtp.gmail.com
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  kafka:
+    bootstrap-servers: 127.0.0.1:29092
+    consumer:
+      group-id: order
 
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        failure-rate-threshold: 10   # 실패 10% 이상 시 서킷 오픈
-        slow-call-duration-threshold: 500   # 500ms 이상 소요 시 실패로 간주
+        failure-rate-threshold: 50   # 실패 4% 이상 시 서킷 오픈
+        slow-call-duration-threshold: 3000   # 500ms 이상 소요 시 실패로 간주
         slow-call-rate-threshold: 10   # slowCallDurationThreshold 초과 비율이 10% 이상 시 서킷 오픈
-        wait-duration-in-open-state: 30000   # OPEN -> HALF-OPEN 전환 전 기다리는 시간
-        minimum-number-of-calls: 50   # 집계에 필요한 최소 호출 수
-        sliding-window-size: 100   # 서킷 CLOSE 상태에서 N회 호출 도달 시 failureRateThreshold 실패 비율 계산
-        permitted-number-of-calls-in-half-open-state: 30   # HALFOPEN -> CLOSE or OPEN 으로 판단하기 위해 호출 횟수
+        wait-duration-in-open-state: 6000   # OPEN -> HALF-OPEN 전환 전 기다리는 시간
+        minimum-number-of-calls: 5   # 집계에 필요한 최소 호출 수
+        sliding-window-size: 10   # 서킷 CLOSE 상태에서 N회 호출 도달 시 failureRateThreshold 실패 비율 계산
+        permitted-number-of-calls-in-half-open-state: 10   # HALFOPEN -> CLOSE or OPEN 으로 판단하기 위해 호출 횟수
+        max-wait-duration-in-half-open-state: 0
+        automatic-transition-from-open-to-half-open-enabled: true
     instances:
       user-service:
         base-config: default
@@ -55,8 +43,8 @@ resilience4j:
   retry:
     configs:
       default:
-        wait-duration: 100   # 재시도 사이 간격
-        max-attempts: 2   # 재시도 횟수(최초 호출 포함)
+        wait-duration: 3000   # 재시도 사이 간격
+        max-attempts: 3   # 재시도 횟수(최초 호출 포함)
     instances:
       user-service:
         base-config: default
@@ -64,20 +52,22 @@ resilience4j:
         base-config: default
 
 env:
-  mail:
-    mailer: "q77642260@gmail.com"
-    subject: "Cerpha 이메일 인증입니다."
-    emailTemplate: |
-      회원 가입을 위한 인증 번호입니다.
-      아래 번호를 이메일 인증 번호에 적어주세요.
-      
-      {number}
-      
-      감사합니다.
   encryption:
     key: "sherpaprojectforclimbingshopping"
   order:
     changeStatusCycle: 0 0 0 * * ?
+  kafka:
+    producer:
+      topic:
+        stock-decrease: "stock-decrease-topic"
+        process-payment: "process-payment-topic"
+        stock-restore: "stock-restore-topic"
+    consumer:
+      topic:
+        rollback-created-order: "rollback-created-order-topic"
+        cancel-created-order: "cancel-created-order-topic"
+        complete-payment: "complete-payment-topic"
+
 
 eureka:
   client:

@@ -24,10 +24,10 @@ public class AddOrderRequest {
     private String deliveryPhone;
 
     @Valid
-    List<AddOrderProductRequest> orderProducts;
+    List<ProductUnitCountRequest> orderProducts;
 
     @Builder
-    public AddOrderRequest(Long userId, String deliveryAddress, String deliveryPhone, List<AddOrderProductRequest> orderProducts) {
+    public AddOrderRequest(Long userId, String deliveryAddress, String deliveryPhone, List<ProductUnitCountRequest> orderProducts) {
         this.userId = userId;
         this.deliveryAddress = deliveryAddress;
         this.deliveryPhone = deliveryPhone;

@@ -1,7 +1,9 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
+import com.cerpha.productservice.cerpha.product.request.AddProductRequest;
 import com.cerpha.productservice.cerpha.product.response.ProductListResponse;
 import com.cerpha.productservice.cerpha.product.response.ProductResponse;
+import com.cerpha.productservice.cerpha.product.response.ProductStockResponse;
 import com.cerpha.productservice.cerpha.product.service.ProductService;
 import com.cerpha.productservice.common.dto.PageResponseDto;
 import com.cerpha.productservice.common.dto.ResultDto;
@@ -40,10 +42,27 @@ public class ProductController {
      * @return
      */
     @GetMapping("/{productId}")
-    public ResponseEntity<ResultDto> getProductDetail(@PathVariable("productId") Long productId) {
+    public ResponseEntity<ResultDto<ProductResponse>> getProductDetail(@PathVariable("productId") Long productId) {
         ProductResponse productDetail = productService.getProductDetail(productId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productDetail));
+    }
+
+    /**
+     * 재고 조회
+     * @param productId
+     * @return
+     */
+    @GetMapping("/{productId}/stock")
+    public ResponseEntity<ResultDto<ProductStockResponse>> getProductStock(@PathVariable("productId") Long productId) {
+        ProductStockResponse productStock = productService.getProductStock(productId);
+        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK, productStock));
+    }
+
+    @PostMapping
+    public ResponseEntity addProduct(@RequestBody AddProductRequest addProductRequest) {
+        productService.addProduct(addProductRequest);
+        return null;
     }
 
 }

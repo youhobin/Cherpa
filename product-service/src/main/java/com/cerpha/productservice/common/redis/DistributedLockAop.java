@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 @RequiredArgsConstructor
 @Slf4j
 public class DistributedLockAop {
-    private static final String REDISSON_LOCK_PREFIX = "LOCK:";
+    private static final String REDISSON_LOCK_PREFIX = "LOCK_PRODUCT:";
 
     private final RedissonClient redissonClient;
     private final AopForTransaction aopForTransaction;

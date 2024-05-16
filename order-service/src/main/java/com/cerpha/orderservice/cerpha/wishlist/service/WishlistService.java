@@ -40,12 +40,11 @@ public class WishlistService {
     @CircuitBreaker(name = "product-service", fallbackMethod = "addWishlistFallback")
     @Retry(name = "product-service")
     @Transactional
-    public void addWishlist(AddWishlistRequest request) {
+    public void addWishlist(AddWishlistRequest request, Long userId) {
         if (wishlistRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId()).isPresent()) {
             throw new BusinessException(DUPLICATED_WISHLIST_PRODUCT);
         }
 
-        Long userId = userClient.getUserId(request.getUserId()).getResultData();
         ProductDetailResponse productDetail = productClient.getProductForWishlist(request.getProductId()).getResultData();
 
         Wishlist wishlist = Wishlist.builder()
@@ -59,9 +58,8 @@ public class WishlistService {
         wishlistRepository.save(wishlist);
     }
 
-    public void addWishlistFallback(AddWishlistRequest request, Throwable e) {
-        log.error(e.getMessage());
-        throw new BusinessException(NOT_AVAILABLE_ADD_WISHLIST);
+    public void addWishlistFallback(AddWishlistRequest request, BusinessException e) {
+        throw new BusinessException(e.getExceptionCode());
     }
 
     @Transactional(readOnly = true)

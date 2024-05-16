@@ -1,5 +1,6 @@
 package com.cerpha.productservice.cerpha.product.controller;
 
+import com.cerpha.productservice.cerpha.product.request.DecreaseStockRequest;
 import com.cerpha.productservice.cerpha.product.request.OrderProductListRequest;
 import com.cerpha.productservice.cerpha.product.request.RestoreStockRequest;
 import com.cerpha.productservice.cerpha.product.response.OrderProductListResponse;
@@ -50,10 +51,22 @@ public class ProductInternalController {
      * @param orderProductListRequest
      * @return
      */
+//    @PostMapping("/order")
+//    public ResponseEntity<ResultDto> decreaseStock(
+//            @RequestBody OrderProductListRequest orderProductListRequest) {
+//        productService.decreaseProductsStock(orderProductListRequest);
+//        return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
+//    }
+
+    /**
+     * 재고 감소 후 결제
+     * @param decreaseStockRequest
+     * @return
+     */
     @PostMapping("/order")
     public ResponseEntity<ResultDto> decreaseStock(
-            @RequestBody OrderProductListRequest orderProductListRequest) {
-        productService.decreaseProductsStock(orderProductListRequest);
+            @RequestBody DecreaseStockRequest decreaseStockRequest) {
+        productService.decreaseProductsStock(decreaseStockRequest);
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }
 

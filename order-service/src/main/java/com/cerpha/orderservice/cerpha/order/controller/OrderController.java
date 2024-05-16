@@ -6,10 +6,12 @@ import com.cerpha.orderservice.cerpha.order.response.OrderListResponse;
 import com.cerpha.orderservice.cerpha.order.service.OrderService;
 import com.cerpha.orderservice.common.dto.ResultDto;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -21,13 +23,15 @@ public class OrderController {
     }
 
     /**
-     * 주문 추가
+     * 주문 추가 시 결제 진입
      * @param addOrderRequest
      * @return
      */
     @PostMapping
-    public ResponseEntity<ResultDto> addOrder(@Valid @RequestBody AddOrderRequest addOrderRequest) {
-        orderService.addOrder(addOrderRequest);
+    public ResponseEntity<ResultDto> addOrderWithPayment(
+            @Valid @RequestBody AddOrderRequest addOrderRequest,
+            @RequestHeader("userId") Long userId) {
+        orderService.addOrderWithPayment(addOrderRequest, userId);
 
         return ResponseEntity.ok(new ResultDto<>(HttpStatus.OK));
     }

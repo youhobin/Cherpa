@@ -24,33 +24,12 @@ public class OrderProduct {
     private Long productId;
 
     private Long unitCount;
-    private Long orderProductPrice;
-    private String productName;
 
     @Builder
-    public OrderProduct(Order order, Long productId, Long unitCount, Long orderProductPrice, String productName) {
+    public OrderProduct(Order order, Long productId, Long unitCount) {
         this.order = order;
         this.productId = productId;
         this.unitCount = unitCount;
-        this.orderProductPrice = orderProductPrice;
-        this.productName = productName;
     }
-
-//    public static OrderProduct addOrderProduct(Long productId, Long unitCount) {
-//        OrderProduct orderProduct = new OrderProduct();
-//        orderProduct.addProduct(productId, unitCount);
-//        product.decreaseStock(unitCount);
-//        return orderProduct;
-//    }
-//
-//    private void addProduct(Product product, Long unitCount) {
-//        this.product = product;
-//        this.unitCount = unitCount;
-//        this.unitPrice = product.getPrice();
-//    }
-//
-//    public void addOrder(Order order) {
-//        this.order = order;
-//    }
 
 }

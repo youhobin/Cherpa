@@ -1,0 +1,101 @@
+services:
+  orderdb:
+    container_name: orderdb
+    image: mariadb:10
+    ports:
+      - 13306:3306
+    volumes:
+      - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/mariadb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  userdb:
+    container_name: userdb
+    image: mariadb:10
+    ports:
+      - 23306:3306
+    volumes:
+      - ~/docker/userdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/userdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/userdb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  productdb:
+    container_name: productdb
+    image: mariadb:10
+    ports:
+      - 33306:3306
+    volumes:
+      - ~/docker/productdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/productdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/productdb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  paymentdb:
+    container_name: paymentdb
+    image: mariadb:10
+    ports:
+      - 43306:3306
+    volumes:
+      - ~/docker/paymentdb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/paymentdb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/paymentdb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=zaq12wsx
+      - MARIADB_USER=hobin
+      - MARIADB_DATABASE=shop
+      - MARIADB_PASSWORD=zaq12wsx
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  zookeeper:
+    container_name: zookeeper
+    image: bitnami/zookeeper:latest
+    ports:
+      - 2181:2181
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:latest
+    ports:
+      - 9092:9092
+      - 29092:29092
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://127.0.0.1:29092
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    depends_on:
+      - zookeeper
