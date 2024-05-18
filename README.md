@@ -41,9 +41,10 @@ api
 ---
 
 ## 트러블 슈팅 경험
-1. 이벤트 발행 보장 (transactional outbox 패턴)
-2. 로그아웃 -> redis 블랙 리스트 사용
+1. 주문 실패 시 보상적 트랜잭션 적용
+2. 이벤트 발행 보장 (transactional outbox 패턴)
 3. msa 에서 동시성 문제 -> redis 분산 락 구현
+4. 로그아웃 -> redis 블랙 리스트 사용
 
 ---
 
