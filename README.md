@@ -1,5 +1,7 @@
 # Cherpa 프로젝트
 
+<br>
+
 ## 프로젝트 소개
 특정 상품에 대해 대규모로 들어오는 주문을 정확하게 처리해 구매할 수 있는 서비스입니다.
 
@@ -33,6 +35,7 @@ DevOps Skill
 
 ## 실행 방법
 
+
 <br>
 
 
@@ -55,7 +58,7 @@ api
 
 
 ## 성능 개선
-1. feign client -> 이벤트 처리 (kafka)ehdtl
+1. feign client -> 이벤트 처리 (kafka)
 
 
 <br>
