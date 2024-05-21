@@ -40,7 +40,8 @@ DevOps Skill
 
 
 ## ERD
-erd 사진
+![image](https://github.com/youhobin/Cherpa/assets/111469930/83a3e180-546e-4ddd-b504-d105115b5c1b)
+
 
 <br>
 
