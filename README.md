@@ -1,9 +1,8 @@
-# Cherpa 프로젝트
+## Cherpa 프로젝트 소개
 
-<br>
-
-## 프로젝트 소개
 특정 상품에 대해 대규모로 들어오는 주문을 정확하게 처리해 구매할 수 있는 서비스입니다.
+
+마이크로서비스 아키텍처(MSA) 구조로, 도커를 활용해 컨테이너를 생성하고, Apache Kafka로 각 서비스간 이벤트를 통한 통신을 학습하는 것에 목표를 두었습니다.
 
 <br>
 
@@ -28,33 +27,17 @@ DevOps Skill
 
 <br>
 
-## 주요 기능
-
-<br>
-
-
-## 실행 방법
-
-
-<br>
-
-
-## ERD
-![image](https://github.com/youhobin/Cherpa/assets/111469930/83a3e180-546e-4ddd-b504-d105115b5c1b)
-
-
-<br>
-
-
-## API 문서
-[API 노션 페이지](https://melon-periodical-048.notion.site/API-6a92035cc0ee413f8237552b5816b378?pvs=4)
-
-<br>
-
-
-
 ## 아키텍처
 아키텍처 사진
+
+<br>
+
+## 주요 기능
+- 회원가입 : 이메일 인증을 통한 회원가입
+- 로그인, 로그아웃 : JWT를 이용한 로그인 구현 및 Redis 블랙리스트를 통해 로그아웃 구현
+- 상품 주문 : 상품 주문 시 주문 데이터가 생성되며, 스케줄러를 통해 주문 상태 관리
+- 상품 반품 및 주문 취소 : 주문 상태에 따라 반품 및 주문 취소 여부 확인 후 작업 실행
+- 결제 : 직접적인 결제 프로세스 구현은 아니지만, 결제 상황을 통해 주문 완료
 
 <br>
 
@@ -70,6 +53,19 @@ DevOps Skill
 - 기존 다른 마이크로서비스간 feign client 통신
 - kafka를 이용한 이벤트 통신으로 변경 후 400개의 응답에 대해 3744ms -> 1152ms로 속도 개선
 
+
+<br>
+
+
+## ERD
+![image](https://github.com/youhobin/Cherpa/assets/111469930/83a3e180-546e-4ddd-b504-d105115b5c1b)
+
+
+<br>
+
+
+## API 문서
+[API 노션 페이지](https://melon-periodical-048.notion.site/API-6a92035cc0ee413f8237552b5816b378?pvs=4)
 
 <br>
 
