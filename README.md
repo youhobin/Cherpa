@@ -28,7 +28,8 @@ DevOps Skill
 <br>
 
 ## 아키텍처
-아키텍처 사진
+![image](https://github.com/user-attachments/assets/989b8d80-c01b-4562-a10c-38dca8a2c2a8)
+
 
 <br>
 
